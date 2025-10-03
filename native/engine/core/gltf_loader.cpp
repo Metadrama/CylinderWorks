@@ -3,6 +3,7 @@
 #include <android/asset_manager.h>
 #include <android/log.h>
 
+#include <algorithm>
 #include <cstdint>
 #include <cstring>
 #include <string>
@@ -23,44 +24,59 @@ bool ReadAssetFile(AAssetManager* manager, const std::string& path, std::vector<
     if (!manager || !outData) {
         return false;
     }
-    AAsset* asset = AAssetManager_open(manager, path.c_str(), AASSET_MODE_BUFFER);
-        if (!asset && path.rfind("flutter_assets/", 0) == 0) {
-            const std::string trimmed = path.substr(std::strlen("flutter_assets/"));
-            asset = AAssetManager_open(manager, trimmed.c_str(), AASSET_MODE_BUFFER);
+    AAsset* asset = nullptr;
+    std::vector<std::string> candidates;
+    const auto addCandidate = [&candidates](const std::string& candidate) {
+        if (candidate.empty()) {
+            return;
         }
+        if (std::find(candidates.begin(), candidates.end(), candidate) == candidates.end()) {
+            candidates.push_back(candidate);
+        }
+    };
 
-        if (!asset && path.rfind("assets/", 0) != 0) {
-            const std::string prefixed = std::string("assets/") + path;
-            asset = AAssetManager_open(manager, prefixed.c_str(), AASSET_MODE_BUFFER);
-        }
+    const std::string assetsPrefix = "assets/";
+    const std::string flutterPrefix = "flutter_assets/";
 
-        if (!asset && path.rfind("assets/", 0) == 0) {
-            const std::string trimmed = path.substr(std::strlen("assets/"));
-            asset = AAssetManager_open(manager, trimmed.c_str(), AASSET_MODE_BUFFER);
-            if (!asset) {
-                const std::string flutterTrimmed = std::string("flutter_assets/") + trimmed;
-                asset = AAssetManager_open(manager, flutterTrimmed.c_str(), AASSET_MODE_BUFFER);
-            }
-            if (!asset) {
-                const std::string flutterPrefixed = std::string("flutter_assets/") + path;
-                asset = AAssetManager_open(manager, flutterPrefixed.c_str(), AASSET_MODE_BUFFER);
-            }
-        }
+    // Normalize to the handful of bundle paths Flutter and the Android asset manager expect.
+    // (Bare entry, assets/, flutter_assets/, and flutter_assets/assets/ variants all appear in builds.)
+    std::string bare = path;
+    if (bare.rfind(flutterPrefix, 0) == 0) {
+        bare = bare.substr(flutterPrefix.size());
+    }
+    if (bare.rfind(assetsPrefix, 0) == 0) {
+        bare = bare.substr(assetsPrefix.size());
+    }
 
-        if (!asset) {
-            __android_log_print(ANDROID_LOG_ERROR, kTag, "Unable to open asset '%s'", path.c_str());
-            return false;
+    addCandidate(path);
+    if (bare != path) {
+        addCandidate(bare);
+    }
+    addCandidate(assetsPrefix + bare);
+    addCandidate(flutterPrefix + bare);
+    addCandidate(flutterPrefix + assetsPrefix + bare);
+
+    for (const std::string& candidate : candidates) {
+        asset = AAssetManager_open(manager, candidate.c_str(), AASSET_MODE_BUFFER);
+        if (asset) {
+            break;
         }
+    }
+
+    if (!asset) {
+        __android_log_print(ANDROID_LOG_ERROR, kTag, "Unable to open asset '%s'", path.c_str());
+        return false;
+    }
     const off_t length = AAsset_getLength(asset);
     outData->resize(static_cast<size_t>(length));
     const int64_t read = AAsset_read(asset, outData->data(), length);
     AAsset_close(asset);
-        if (read != length) {
-            __android_log_print(ANDROID_LOG_ERROR, kTag, "Short read for asset '%s' (%lld / %lld)",
-                                path.c_str(), static_cast<long long>(read), static_cast<long long>(length));
-            return false;
-        }
-        return true;
+    if (read != length) {
+        __android_log_print(ANDROID_LOG_ERROR, kTag, "Short read for asset '%s' (%lld / %lld)",
+                            path.c_str(), static_cast<long long>(read), static_cast<long long>(length));
+        return false;
+    }
+    return true;
 }
 
 bool ExtractGlbChunks(const std::vector<uint8_t>& data, GlbChunks* outChunks, std::string* outError) {
