@@ -38,7 +38,7 @@ class EngineRendererView(context: Context) : PlatformView, SurfaceHolder.Callbac
 
         if (rendererHandle != 0L) {
             NativeBridge.nativeSetAssetManager(rendererHandle, context.assets)
-            val assetKey = FlutterInjector.instance().flutterLoader().getLookupKeyForAsset("engine/assembly.json")
+            val assetKey = FlutterInjector.instance().flutterLoader().getLookupKeyForAsset("assets/engine/assembly.json")
             val loaded = NativeBridge.nativeLoadAssembly(rendererHandle, assetKey)
             if (!loaded) {
                 Log.w(TAG, "Failed to schedule assembly load for asset: $assetKey")

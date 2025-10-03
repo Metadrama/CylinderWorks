@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <limits>
 #include <string>
 #include <utility>
 #include <vector>
@@ -57,62 +58,14 @@ std::string JoinAssetPath(const std::string& base, const std::string& relative) 
         return relative;
     }
 
-    if (relative[0] == '/' || relative.rfind("flutter_assets/", 0) == 0) {
+    if (relative[0] == '/' ||
+        relative.rfind("assets/", 0) == 0 ||
+        relative.rfind("flutter_assets/", 0) == 0) {
         return relative;
     }
 
-    auto tokenize = [](const std::string& path) {
-        std::vector<std::string> segments;
-        size_t start = 0;
-        while (start < path.size()) {
-            size_t end = path.find('/', start);
-            if (end == std::string::npos) {
-                end = path.size();
-            }
-            if (end > start) {
-                segments.emplace_back(path.substr(start, end - start));
-            }
-            start = end + 1;
-        }
-        return segments;
-    };
-
-    std::vector<std::string> segments;
-    if (!base.empty()) {
-        segments = tokenize(base);
-        if (!base.empty() && base.back() == '/') {
-            // Treat base as a directory path by keeping segments as-is.
-        } else if (!segments.empty()) {
-            segments.pop_back();
-        }
-    }
-
-    const auto relativeSegments = tokenize(relative);
-    for (const auto& seg : relativeSegments) {
-        if (seg == ".") {
-            continue;
-        }
-        if (seg == "..") {
-            if (!segments.empty()) {
-                segments.pop_back();
-            }
-            continue;
-        }
-        if (seg.rfind("flutter_assets", 0) == 0) {
-            // Treat explicit flutter_assets prefix as absolute within the bundle.
-            segments.clear();
-        }
-        segments.push_back(seg);
-    }
-
-    std::string joined;
-    for (size_t i = 0; i < segments.size(); ++i) {
-        joined.append(segments[i]);
-        if (i + 1 < segments.size()) {
-            joined.push_back('/');
-        }
-    }
-    return joined;
+    // Default assets live under the bundle "assets/" root.
+    return std::string("assets/") + relative;
 }
 
 Vec3 ParseVec3(const JsonValue& array, const Vec3& fallback) {
@@ -224,6 +177,10 @@ bool EngineAssembly::LoadPart(AAssetManager* assetManager,
     const std::string meshRelative = partJson["mesh"].AsString("");
     const std::string meshPath = JoinAssetPath(basePath, meshRelative);
 
+    __android_log_print(ANDROID_LOG_INFO, kTag,
+                        "Loading part '%s' from asset '%s' (relative '%s')",
+                        part.name.c_str(), meshPath.c_str(), meshRelative.c_str());
+
     Vec3 position{0.0f, 0.0f, 0.0f};
     Vec3 rotation{0.0f, 0.0f, 0.0f};
     Vec3 color{0.75f, 0.75f, 0.75f};
@@ -248,11 +205,49 @@ bool EngineAssembly::LoadPart(AAssetManager* assetManager,
     MeshSourceData sourceData;
     std::string error;
     if (LoadMeshFromGlb(assetManager, meshPath, &sourceData, &error)) {
-        part.mesh.Initialize(sourceData.positions, sourceData.normals, sourceData.indices);
+        if (!sourceData.positions.empty()) {
+            Vec3 minBounds{std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
+            Vec3 maxBounds{std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest()};
+            for (size_t i = 0; i + 2 < sourceData.positions.size(); i += 3) {
+                const float x = sourceData.positions[i + 0];
+                const float y = sourceData.positions[i + 1];
+                const float z = sourceData.positions[i + 2];
+                minBounds.x = std::min(minBounds.x, x);
+                minBounds.y = std::min(minBounds.y, y);
+                minBounds.z = std::min(minBounds.z, z);
+                maxBounds.x = std::max(maxBounds.x, x);
+                maxBounds.y = std::max(maxBounds.y, y);
+                maxBounds.z = std::max(maxBounds.z, z);
+            }
+            __android_log_print(ANDROID_LOG_INFO, kTag,
+                                "Part '%s' geometry: %zu vertices, %zu indices, AABB min(%.3f, %.3f, %.3f) max(%.3f, %.3f, %.3f)",
+                                part.name.c_str(), sourceData.positions.size() / 3,
+                                sourceData.indices.size(),
+                                minBounds.x, minBounds.y, minBounds.z,
+                                maxBounds.x, maxBounds.y, maxBounds.z);
+        } else {
+            __android_log_print(ANDROID_LOG_ERROR, kTag,
+                                "Part '%s' mesh '%s' returned no vertex positions", part.name.c_str(), meshPath.c_str());
+        }
+
+        if (!part.mesh.Initialize(sourceData.positions, sourceData.normals, sourceData.indices)) {
+            __android_log_print(ANDROID_LOG_ERROR, kTag,
+                                "Part '%s' mesh initialization failed (%s)", part.name.c_str(), meshPath.c_str());
+        }
     }
 
     if (!part.mesh.IsValid()) {
-        __android_log_print(ANDROID_LOG_WARN, kTag, "Falling back to placeholder mesh for part '%s' (%s)",
+        if (!error.empty()) {
+            __android_log_print(ANDROID_LOG_ERROR, kTag,
+                                "Failed to load mesh for part '%s' (%s): %s", part.name.c_str(), meshPath.c_str(),
+                                error.c_str());
+        } else {
+            __android_log_print(ANDROID_LOG_ERROR, kTag,
+                                "Mesh for part '%s' invalid after load (%s); using placeholder", part.name.c_str(),
+                                meshPath.c_str());
+        }
+        __android_log_print(ANDROID_LOG_WARN, kTag,
+                            "Falling back to placeholder mesh for part '%s' (%s)",
                             part.name.c_str(), meshPath.c_str());
         part.mesh.InitializePlaceholder(0.15f);
     }

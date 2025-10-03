@@ -24,14 +24,43 @@ bool ReadAssetFile(AAssetManager* manager, const std::string& path, std::vector<
         return false;
     }
     AAsset* asset = AAssetManager_open(manager, path.c_str(), AASSET_MODE_BUFFER);
-    if (!asset) {
-        return false;
-    }
+        if (!asset && path.rfind("flutter_assets/", 0) == 0) {
+            const std::string trimmed = path.substr(std::strlen("flutter_assets/"));
+            asset = AAssetManager_open(manager, trimmed.c_str(), AASSET_MODE_BUFFER);
+        }
+
+        if (!asset && path.rfind("assets/", 0) != 0) {
+            const std::string prefixed = std::string("assets/") + path;
+            asset = AAssetManager_open(manager, prefixed.c_str(), AASSET_MODE_BUFFER);
+        }
+
+        if (!asset && path.rfind("assets/", 0) == 0) {
+            const std::string trimmed = path.substr(std::strlen("assets/"));
+            asset = AAssetManager_open(manager, trimmed.c_str(), AASSET_MODE_BUFFER);
+            if (!asset) {
+                const std::string flutterTrimmed = std::string("flutter_assets/") + trimmed;
+                asset = AAssetManager_open(manager, flutterTrimmed.c_str(), AASSET_MODE_BUFFER);
+            }
+            if (!asset) {
+                const std::string flutterPrefixed = std::string("flutter_assets/") + path;
+                asset = AAssetManager_open(manager, flutterPrefixed.c_str(), AASSET_MODE_BUFFER);
+            }
+        }
+
+        if (!asset) {
+            __android_log_print(ANDROID_LOG_ERROR, kTag, "Unable to open asset '%s'", path.c_str());
+            return false;
+        }
     const off_t length = AAsset_getLength(asset);
     outData->resize(static_cast<size_t>(length));
     const int64_t read = AAsset_read(asset, outData->data(), length);
     AAsset_close(asset);
-    return read == length;
+        if (read != length) {
+            __android_log_print(ANDROID_LOG_ERROR, kTag, "Short read for asset '%s' (%lld / %lld)",
+                                path.c_str(), static_cast<long long>(read), static_cast<long long>(length));
+            return false;
+        }
+        return true;
 }
 
 bool ExtractGlbChunks(const std::vector<uint8_t>& data, GlbChunks* outChunks, std::string* outError) {
@@ -309,14 +338,14 @@ bool LoadMeshFromGlb(AAssetManager* assetManager,
     std::vector<uint8_t> fileData;
     if (!ReadAssetFile(assetManager, assetPath, &fileData)) {
         if (outError) {
-            *outError = "Unable to open asset: " + assetPath;
+            *outError = "Unable to open asset";
         }
         return false;
     }
 
     GlbChunks chunks;
     if (!ExtractGlbChunks(fileData, &chunks, outError)) {
-        __android_log_print(ANDROID_LOG_WARN, kTag, "Failed to parse GLB '%s': %s", assetPath.c_str(),
+        __android_log_print(ANDROID_LOG_ERROR, kTag, "Failed to parse GLB '%s': %s", assetPath.c_str(),
                             outError ? outError->c_str() : "");
         return false;
     }
@@ -326,6 +355,7 @@ bool LoadMeshFromGlb(AAssetManager* assetManager,
         if (outError) {
             *outError = "JSON parse failure";
         }
+        __android_log_print(ANDROID_LOG_ERROR, kTag, "GLB '%s' JSON parse failure", assetPath.c_str());
         return false;
     }
 
@@ -334,6 +364,7 @@ bool LoadMeshFromGlb(AAssetManager* assetManager,
         if (outError) {
             *outError = "GLB contains no meshes";
         }
+        __android_log_print(ANDROID_LOG_ERROR, kTag, "GLB '%s' contains no meshes", assetPath.c_str());
         return false;
     }
 
@@ -343,6 +374,7 @@ bool LoadMeshFromGlb(AAssetManager* assetManager,
         if (outError) {
             *outError = "Mesh contains no primitives";
         }
+        __android_log_print(ANDROID_LOG_ERROR, kTag, "GLB '%s' mesh[0] has no primitives", assetPath.c_str());
         return false;
     }
 
@@ -352,6 +384,7 @@ bool LoadMeshFromGlb(AAssetManager* assetManager,
         if (outError) {
             *outError = "Primitive missing attributes";
         }
+        __android_log_print(ANDROID_LOG_ERROR, kTag, "GLB '%s' primitive missing attributes", assetPath.c_str());
         return false;
     }
 
@@ -360,6 +393,7 @@ bool LoadMeshFromGlb(AAssetManager* assetManager,
         if (outError) {
             *outError = "Primitive missing POSITION attribute";
         }
+        __android_log_print(ANDROID_LOG_ERROR, kTag, "GLB '%s' primitive missing POSITION", assetPath.c_str());
         return false;
     }
 
