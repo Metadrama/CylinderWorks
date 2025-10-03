@@ -6,20 +6,18 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../core ${CMAKE_CURRENT_BINARY_DIR}/engine_core)
+
 add_library(engine_renderer SHARED
     engine_renderer.cpp
     egl_context.cpp
     jni_bridge.cpp
-    ../../core/camera.cpp
-    ../../core/grid_plane.cpp
-    ../../core/shader_program.cpp
 )
 
 target_include_directories(engine_renderer
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../core
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../..
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../..
 )
 
 target_compile_options(engine_renderer
@@ -47,6 +45,7 @@ endif()
 
 target_link_libraries(engine_renderer
     PRIVATE
+        engine_core
         ${log-lib}
         ${android-lib}
         ${egl-lib}
