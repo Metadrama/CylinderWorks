@@ -123,7 +123,7 @@ class EngineRendererView(context: Context) : PlatformView, SurfaceHolder.Callbac
                     InteractionMode.ORBIT -> {
                         val dx = event.x - lastSingleTouch.x
                         val dy = event.y - lastSingleTouch.y
-                        NativeBridge.nativeOrbit(rendererHandle, dx, dy)
+                        NativeBridge.nativeOrbit(rendererHandle, -dx, -dy)
                         lastSingleTouch.set(event.x, event.y)
                     }
                     InteractionMode.PAN -> {

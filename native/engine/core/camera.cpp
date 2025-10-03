@@ -7,9 +7,9 @@ namespace engine {
 namespace {
 constexpr float kPitchMin = -1.3962634f;  // -80 degrees
 constexpr float kPitchMax = 1.3962634f;   // 80 degrees
-constexpr float kOrbitSensitivity = 0.005f;
-constexpr float kPanSensitivity = 0.0025f;
-constexpr float kZoomSensitivity = 1.0f;
+constexpr float kOrbitSensitivity = 0.0010f;
+constexpr float kPanSensitivity = 0.0016f;
+constexpr float kZoomSensitivity = 0.7f;
 }  // namespace
 
 OrbitCamera::OrbitCamera() {
@@ -27,7 +27,7 @@ void OrbitCamera::Reset() {
 
 void OrbitCamera::Orbit(float deltaYaw, float deltaPitch) {
     yaw_ += deltaYaw * kOrbitSensitivity;
-    pitch_ += deltaPitch * kOrbitSensitivity;
+    pitch_ -= deltaPitch * kOrbitSensitivity;
     ClampAngles();
 }
 
