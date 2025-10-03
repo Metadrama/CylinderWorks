@@ -8,12 +8,12 @@
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
 
-#include "camera.h"
-#include "egl_context.h"
-#include "grid_plane.h"
-#include "diagnostics.h"
-#include "math_types.h"
-#include "shader_program.h"
+#include "engine/core/camera.h"
+#include "engine/platform/android/egl_context.h"
+#include "engine/core/grid_plane.h"
+#include "engine/core/diagnostics.h"
+#include "engine/core/math_types.h"
+#include "engine/core/shader_program.h"
 
 namespace engine {
 

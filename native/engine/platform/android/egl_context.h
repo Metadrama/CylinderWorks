@@ -2,6 +2,7 @@
 
 #include <EGL/egl.h>
 #include <android/native_window.h>
+#include <cstdint>
 
 namespace engine {
 

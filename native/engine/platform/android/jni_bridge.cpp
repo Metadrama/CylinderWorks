@@ -5,7 +5,7 @@
 #include <new>
 #include <cstdint>
 
-#include "engine_renderer.h"
+#include "engine/platform/android/engine_renderer.h"
 
 namespace {
 constexpr const char* kTag = "EngineRenderer";
