@@ -19,6 +19,7 @@ constexpr const char* kTag = "EngineRenderer";
 constexpr float kMajorStep = 1.0f;
 constexpr float kMinorStep = 0.1f;
 constexpr float kPlaneExtent = 200.0f;
+constexpr float kLightDir[3] = {-0.35f, 1.0f, 0.45f};
 
 void CopyGlString(const GLubyte* source, std::array<char, 128>& destination) {
     if (!source) {
@@ -28,7 +29,7 @@ void CopyGlString(const GLubyte* source, std::array<char, 128>& destination) {
     std::snprintf(destination.data(), destination.size(), "%s", reinterpret_cast<const char*>(source));
 }
 
-const char* kVertexShaderSrc = R"(
+const char* kGridVertexShaderSrc = R"(
 #version 300 es
 layout(location = 0) in vec3 aPosition;
 uniform mat4 uViewProj;
@@ -44,7 +45,7 @@ void main() {
 }
 )";
 
-const char* kFragmentShaderSrc = R"(
+const char* kGridFragmentShaderSrc = R"(
 #version 300 es
 precision mediump float;
 in vec3 vWorldPos;
@@ -76,6 +77,40 @@ void main() {
     float fade = clamp(1.0 - length(vLocalPos.xz) * 0.5, 0.0, 1.0);
     color *= fade + 0.2;
 
+    fragColor = vec4(color, 1.0);
+}
+)";
+
+const char* kPartVertexShaderSrc = R"(
+#version 300 es
+layout(location = 0) in vec3 aPosition;
+layout(location = 1) in vec3 aNormal;
+uniform mat4 uPartViewProj;
+uniform mat4 uPartModel;
+out vec3 vNormal;
+out vec3 vWorldPos;
+void main() {
+    vec4 world = uPartModel * vec4(aPosition, 1.0);
+    vWorldPos = world.xyz;
+    vNormal = mat3(uPartModel) * aNormal;
+    gl_Position = uPartViewProj * world;
+}
+)";
+
+const char* kPartFragmentShaderSrc = R"(
+#version 300 es
+precision mediump float;
+in vec3 vNormal;
+in vec3 vWorldPos;
+uniform vec3 uPartColor;
+uniform vec3 uLightDir;
+out vec4 fragColor;
+
+void main() {
+    vec3 normal = normalize(vNormal);
+    vec3 lightDir = normalize(uLightDir);
+    float diffuse = max(dot(normal, lightDir), 0.15);
+    vec3 color = uPartColor * diffuse;
     fragColor = vec4(color, 1.0);
 }
 )";
@@ -149,6 +184,44 @@ void EngineRenderer::SetPreferredFrameRate(int fps) {
     preferredFps_.store(fps);
 }
 
+void EngineRenderer::SetAssetManager(AAssetManager* assetManager) {
+    std::scoped_lock lock(mutex_);
+    assetManager_ = assetManager;
+    assemblyLoaded_ = false;
+}
+
+void EngineRenderer::SetAssemblyMapping(const std::string& mappingPath) {
+    std::scoped_lock lock(mutex_);
+    assemblyMappingPath_ = mappingPath;
+    assemblyLoaded_ = false;
+}
+
+void EngineRenderer::SetControlInputs(const EngineControlInputs& inputs) {
+    std::scoped_lock lock(mutex_);
+    controlInputs_ = inputs;
+    physics_.SetControlInputs(inputs);
+}
+
+size_t EngineRenderer::PartCount() const {
+    std::scoped_lock lock(mutex_);
+    return assembly_.Parts().size();
+}
+
+bool EngineRenderer::CopyPartTransform(size_t index, Mat4* outMatrix, std::string* outName) const {
+    std::scoped_lock lock(mutex_);
+    const auto& parts = assembly_.Parts();
+    if (index >= parts.size()) {
+        return false;
+    }
+    if (outMatrix) {
+        *outMatrix = parts[index].currentTransform;
+    }
+    if (outName) {
+        *outName = parts[index].name;
+    }
+    return true;
+}
+
 void EngineRenderer::Start() {
     if (isRunning_) {
         return;
@@ -175,29 +248,44 @@ void EngineRenderer::InitializeGlResourcesLocked() {
         return;
     }
 
-    shader_.Destroy();
+    gridShader_.Destroy();
+    partShader_.Destroy();
     gridPlane_.Destroy();
+    assembly_.Destroy();
+    assemblyLoaded_ = false;
 
-    if (!shader_.Compile(kVertexShaderSrc, kFragmentShaderSrc)) {
+    if (!gridShader_.Compile(kGridVertexShaderSrc, kGridFragmentShaderSrc)) {
         __android_log_print(ANDROID_LOG_ERROR, kTag, "Failed to compile shader program");
         return;
     }
 
-    uViewProj_ = glGetUniformLocation(shader_.Id(), "uViewProj");
-    uModel_ = glGetUniformLocation(shader_.Id(), "uModel");
-    uCameraPos_ = glGetUniformLocation(shader_.Id(), "uCameraPos");
+    uViewProj_ = glGetUniformLocation(gridShader_.Id(), "uViewProj");
+    uModel_ = glGetUniformLocation(gridShader_.Id(), "uModel");
+    uCameraPos_ = glGetUniformLocation(gridShader_.Id(), "uCameraPos");
 
-    GLint extentLocation = glGetUniformLocation(shader_.Id(), "uExtent");
-    GLint majorLocation = glGetUniformLocation(shader_.Id(), "uMajorStep");
-    GLint minorLocation = glGetUniformLocation(shader_.Id(), "uMinorStep");
+    GLint extentLocation = glGetUniformLocation(gridShader_.Id(), "uExtent");
+    GLint majorLocation = glGetUniformLocation(gridShader_.Id(), "uMajorStep");
+    GLint minorLocation = glGetUniformLocation(gridShader_.Id(), "uMinorStep");
 
     gridPlane_.Initialize();
 
-    glUseProgram(shader_.Id());
+    glUseProgram(gridShader_.Id());
     glUniform1f(extentLocation, kPlaneExtent);
     glUniform1f(majorLocation, kMajorStep);
     glUniform1f(minorLocation, kMinorStep);
     glUseProgram(0);
+
+    if (!partShader_.Compile(kPartVertexShaderSrc, kPartFragmentShaderSrc)) {
+        __android_log_print(ANDROID_LOG_ERROR, kTag, "Failed to compile part shader program");
+        return;
+    }
+
+    uPartViewProj_ = glGetUniformLocation(partShader_.Id(), "uPartViewProj");
+    uPartModel_ = glGetUniformLocation(partShader_.Id(), "uPartModel");
+    uPartColor_ = glGetUniformLocation(partShader_.Id(), "uPartColor");
+    uPartLightDir_ = glGetUniformLocation(partShader_.Id(), "uLightDir");
+
+    EnsureAssemblyInitializedLocked();
 
     CopyGlString(glGetString(GL_RENDERER), gpuRenderer_);
     CopyGlString(glGetString(GL_VENDOR), gpuVendor_);
@@ -209,19 +297,28 @@ void EngineRenderer::InitializeGlResourcesLocked() {
 
 void EngineRenderer::DestroyGlResourcesLocked() {
     if (!egl_.IsValid()) {
-        shader_.Destroy();
+        gridShader_.Destroy();
+        partShader_.Destroy();
         gridPlane_.Destroy();
+        assembly_.Destroy();
+        assemblyLoaded_ = false;
         return;
     }
 
     if (!egl_.MakeCurrent()) {
-        shader_.Destroy();
+        gridShader_.Destroy();
+        partShader_.Destroy();
         gridPlane_.Destroy();
+        assembly_.Destroy();
+        assemblyLoaded_ = false;
         return;
     }
 
-    shader_.Destroy();
+    gridShader_.Destroy();
+    partShader_.Destroy();
     gridPlane_.Destroy();
+    assembly_.Destroy();
+    assemblyLoaded_ = false;
 
     egl_.DetachCurrent();
     eglReleaseThread();
@@ -237,6 +334,27 @@ void EngineRenderer::ClearSurfaceLocked() {
     width_ = 0;
     height_ = 0;
     egl_.Destroy();
+}
+
+void EngineRenderer::EnsureAssemblyInitializedLocked() {
+    if (assemblyLoaded_) {
+        return;
+    }
+    if (!assetManager_ || assemblyMappingPath_.empty()) {
+        return;
+    }
+
+    assembly_.Destroy();
+    if (!assembly_.Load(assetManager_, assemblyMappingPath_)) {
+        __android_log_print(ANDROID_LOG_WARN, kTag, "Assembly load failed for '%s'", assemblyMappingPath_.c_str());
+        assemblyLoaded_ = false;
+        return;
+    }
+
+    physics_.SetAnchors(assembly_.Anchors());
+    physics_.SetControlInputs(controlInputs_);
+    assembly_.ApplyTransforms(physics_.Evaluate(0.0f));
+    assemblyLoaded_ = true;
 }
 
 void EngineRenderer::RenderFrame(int64_t frameTimeNanos) {
@@ -266,7 +384,7 @@ void EngineRenderer::RenderFrame(int64_t frameTimeNanos) {
     glClearColor(0.04f, 0.05f, 0.07f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glUseProgram(shader_.Id());
+    glUseProgram(gridShader_.Id());
 
     const Mat4 model = Mat4::Identity();
     const Mat4 view = camera_.ViewMatrix();
@@ -280,6 +398,30 @@ void EngineRenderer::RenderFrame(int64_t frameTimeNanos) {
     glUniform3f(uCameraPos_, eye.x, eye.y, eye.z);
 
     gridPlane_.Draw();
+
+    float deltaSeconds = 0.0f;
+    const float frameTime = frameTimeMs_.load(std::memory_order_relaxed);
+    if (frameTime > 0.0f) {
+        deltaSeconds = frameTime / 1000.0f;
+    }
+
+    EnsureAssemblyInitializedLocked();
+    if (assemblyLoaded_) {
+        const auto& transforms = physics_.Evaluate(deltaSeconds);
+        assembly_.ApplyTransforms(transforms);
+
+        glUseProgram(partShader_.Id());
+        glUniformMatrix4fv(uPartViewProj_, 1, GL_FALSE, viewProj.Ptr());
+        glUniform3f(uPartLightDir_, kLightDir[0], kLightDir[1], kLightDir[2]);
+
+        const auto& parts = assembly_.Parts();
+        for (const auto& part : parts) {
+            glUniformMatrix4fv(uPartModel_, 1, GL_FALSE, part.currentTransform.Ptr());
+            glUniform3f(uPartColor_, part.color.x, part.color.y, part.color.z);
+            part.mesh.Draw();
+        }
+        glUseProgram(0);
+    }
 
     egl_.SwapBuffers();
 }

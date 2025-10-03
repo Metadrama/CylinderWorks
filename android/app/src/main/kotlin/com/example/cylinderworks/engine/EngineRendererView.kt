@@ -9,6 +9,7 @@ import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.View
 import io.flutter.plugin.platform.PlatformView
+import io.flutter.FlutterInjector
 import kotlin.math.ln
 
 private enum class InteractionMode {
@@ -32,8 +33,18 @@ class EngineRendererView(context: Context) : PlatformView, SurfaceHolder.Callbac
     private var rendererHandle: Long = 0
 
     init {
-    rendererHandle = NativeBridge.nativeCreateRenderer()
-    EngineDiagnosticsRegistry.register(this)
+        rendererHandle = NativeBridge.nativeCreateRenderer()
+        EngineDiagnosticsRegistry.register(this)
+
+        if (rendererHandle != 0L) {
+            NativeBridge.nativeSetAssetManager(rendererHandle, context.assets)
+            val assetKey = FlutterInjector.instance().flutterLoader().getLookupKeyForAsset("engine/assembly.json")
+            val loaded = NativeBridge.nativeLoadAssembly(rendererHandle, assetKey)
+            if (!loaded) {
+                Log.w(TAG, "Failed to schedule assembly load for asset: $assetKey")
+            }
+            NativeBridge.nativeSetControlInputs(rendererHandle, 0f, false, false)
+        }
 
         surfaceView = object : SurfaceView(context) {
             override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -47,7 +58,7 @@ class EngineRendererView(context: Context) : PlatformView, SurfaceHolder.Callbac
         surfaceView.setZOrderOnTop(false)
         surfaceView.keepScreenOn = true
 
-        scaleDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+    scaleDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
             override fun onScale(detector: ScaleGestureDetector): Boolean {
                 if (rendererHandle == 0L) return false
                 val scaleFactor = detector.scaleFactor

@@ -1,9 +1,13 @@
 #include <jni.h>
 
+#include <android/asset_manager_jni.h>
 #include <android/native_window_jni.h>
 #include <android/log.h>
 #include <new>
+#include <algorithm>
 #include <cstdint>
+#include <string>
+#include <cstring>
 
 #include "engine/platform/android/engine_renderer.h"
 
@@ -21,6 +25,19 @@ inline engine::EngineRenderer* FromPointer(int64_t ptr) {
 template <typename T>
 inline int64_t ToPointer(T* ptr) {
     return reinterpret_cast<int64_t>(ptr);
+}
+
+std::string ToStdString(JNIEnv* env, jstring value) {
+    if (!env || !value) {
+        return {};
+    }
+    const char* chars = env->GetStringUTFChars(value, nullptr);
+    if (!chars) {
+        return {};
+    }
+    std::string result(chars);
+    env->ReleaseStringUTFChars(value, chars);
+    return result;
 }
 
 }  // namespace
@@ -172,6 +189,40 @@ Java_com_example_cylinderworks_engine_NativeBridge_nativeSetSurface(JNIEnv* env,
 }
 
 JNIEXPORT void JNICALL
+Java_com_example_cylinderworks_engine_NativeBridge_nativeSetAssetManager(JNIEnv* env, jclass /*clazz*/, jlong handle, jobject assetManager) {
+    auto* renderer = FromHandle(handle);
+    if (!renderer) {
+        return;
+    }
+    AAssetManager* manager = AAssetManager_fromJava(env, assetManager);
+    renderer->SetAssetManager(manager);
+}
+
+JNIEXPORT jboolean JNICALL
+Java_com_example_cylinderworks_engine_NativeBridge_nativeLoadAssembly(JNIEnv* env, jclass /*clazz*/, jlong handle, jstring assetKey) {
+    auto* renderer = FromHandle(handle);
+    if (!renderer) {
+        return JNI_FALSE;
+    }
+    std::string key = ToStdString(env, assetKey);
+    renderer->SetAssemblyMapping(key);
+    return key.empty() ? JNI_FALSE : JNI_TRUE;
+}
+
+JNIEXPORT void JNICALL
+Java_com_example_cylinderworks_engine_NativeBridge_nativeSetControlInputs(JNIEnv* env, jclass /*clazz*/, jlong handle, jfloat throttle, jboolean starter, jboolean ignition) {
+    auto* renderer = FromHandle(handle);
+    if (!renderer) {
+        return;
+    }
+    engine::EngineControlInputs inputs;
+    inputs.throttle = throttle;
+    inputs.starterEngaged = starter == JNI_TRUE;
+    inputs.ignitionEnabled = ignition == JNI_TRUE;
+    renderer->SetControlInputs(inputs);
+}
+
+JNIEXPORT void JNICALL
 Java_com_example_cylinderworks_engine_NativeBridge_nativeResize(JNIEnv* env, jclass /*clazz*/, jlong handle, jint width, jint height) {
     auto* renderer = FromHandle(handle);
     if (!renderer) {
@@ -316,6 +367,47 @@ void engine_renderer_stop(int64_t handle) {
         return;
     }
     renderer->Stop();
+}
+
+void engine_renderer_set_controls(int64_t handle, float throttle, int starter, int ignition) {
+    auto* renderer = FromPointer(handle);
+    if (!renderer) {
+        return;
+    }
+    engine::EngineControlInputs inputs;
+    inputs.throttle = throttle;
+    inputs.starterEngaged = starter != 0;
+    inputs.ignitionEnabled = ignition != 0;
+    renderer->SetControlInputs(inputs);
+}
+
+int32_t engine_renderer_part_count(int64_t handle) {
+    auto* renderer = FromPointer(handle);
+    if (!renderer) {
+        return 0;
+    }
+    return static_cast<int32_t>(renderer->PartCount());
+}
+
+int engine_renderer_copy_part_transform(int64_t handle, int32_t index, float* outMatrix16, char* nameBuffer, size_t nameBufferLength) {
+    auto* renderer = FromPointer(handle);
+    if (!renderer) {
+        return 0;
+    }
+    engine::Mat4 matrix;
+    std::string name;
+    if (!renderer->CopyPartTransform(static_cast<size_t>(index), outMatrix16 ? &matrix : nullptr, nameBuffer ? &name : nullptr)) {
+        return 0;
+    }
+    if (outMatrix16) {
+        std::memcpy(outMatrix16, matrix.data.data(), sizeof(float) * 16);
+    }
+    if (nameBuffer && nameBufferLength > 0) {
+        const size_t copy = std::min(name.size(), nameBufferLength - 1);
+        std::memcpy(nameBuffer, name.data(), copy);
+        nameBuffer[copy] = '\0';
+    }
+    return 1;
 }
 
 }  // extern "C"

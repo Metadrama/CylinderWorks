@@ -5,13 +5,17 @@
 #include <mutex>
 #include <thread>
 
+#include <android/asset_manager.h>
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
 
+#include <string>
 #include "engine/core/camera.h"
+#include "engine/core/diagnostics.h"
+#include "engine/core/engine_assembly.h"
 #include "engine/platform/android/egl_context.h"
 #include "engine/core/grid_plane.h"
-#include "engine/core/diagnostics.h"
+#include "engine/core/physics_stub.h"
 #include "engine/core/math_types.h"
 #include "engine/core/shader_program.h"
 
@@ -32,6 +36,12 @@ public:
     void Zoom(float scaleDelta);
 
     void SetPreferredFrameRate(int fps);
+    void SetAssetManager(AAssetManager* assetManager);
+    void SetAssemblyMapping(const std::string& mappingPath);
+    void SetControlInputs(const EngineControlInputs& inputs);
+
+    size_t PartCount() const;
+    bool CopyPartTransform(size_t index, Mat4* outMatrix, std::string* outName) const;
 
     void Start();
     void Stop();
@@ -42,6 +52,7 @@ private:
     void InitializeGlResourcesLocked();
     void DestroyGlResourcesLocked();
     void ClearSurfaceLocked();
+    void EnsureAssemblyInitializedLocked();
 
     void RenderFrame(int64_t frameTimeNanos);
     static void FrameCallback(long frameTimeNanos, void* data);
@@ -58,12 +69,20 @@ private:
 
     EglContext egl_{};
     OrbitCamera camera_{};
-    ShaderProgram shader_{};
+    ShaderProgram gridShader_{};
+    ShaderProgram partShader_{};
     GridPlane gridPlane_{};
+    EngineAssembly assembly_{};
+    PhysicsSystemStub physics_{};
+    EngineControlInputs controlInputs_{};
 
     GLint uViewProj_{-1};
     GLint uModel_{-1};
     GLint uCameraPos_{-1};
+    GLint uPartViewProj_{-1};
+    GLint uPartModel_{-1};
+    GLint uPartColor_{-1};
+    GLint uPartLightDir_{-1};
 
     int width_{0};
     int height_{0};
@@ -82,6 +101,10 @@ private:
 
     std::thread fallbackThread_;
     std::atomic_bool fallbackThreadRunning_{false};
+
+    AAssetManager* assetManager_{nullptr};
+    std::string assemblyMappingPath_{};
+    bool assemblyLoaded_{false};
 };
 
 }  // namespace engine

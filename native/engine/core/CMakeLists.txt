@@ -1,6 +1,11 @@
 add_library(engine_core STATIC
     camera.cpp
+    engine_assembly.cpp
+    gltf_loader.cpp
     grid_plane.cpp
+    json_utils.cpp
+    mesh.cpp
+    physics_stub.cpp
     shader_program.cpp
 )
 

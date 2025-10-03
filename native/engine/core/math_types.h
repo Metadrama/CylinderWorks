@@ -161,4 +161,59 @@ inline float Radians(float degrees) {
     return degrees * 0.01745329251994329577f;
 }
 
+inline Mat4 Translation(const Vec3& t) {
+    Mat4 m = Mat4::Identity();
+    m.data[12] = t.x;
+    m.data[13] = t.y;
+    m.data[14] = t.z;
+    return m;
+}
+
+inline Mat4 Scale(const Vec3& s) {
+    Mat4 m{};
+    m.data = {
+        s.x, 0.0f, 0.0f, 0.0f,
+        0.0f, s.y, 0.0f, 0.0f,
+        0.0f, 0.0f, s.z, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f
+    };
+    return m;
+}
+
+inline Mat4 RotationXYZ(const Vec3& degrees) {
+    const float rx = Radians(degrees.x);
+    const float ry = Radians(degrees.y);
+    const float rz = Radians(degrees.z);
+
+    const float cx = std::cos(rx);
+    const float sx = std::sin(rx);
+    const float cy = std::cos(ry);
+    const float sy = std::sin(ry);
+    const float cz = std::cos(rz);
+    const float sz = std::sin(rz);
+
+    Mat4 result = Mat4::Identity();
+
+    result.data[0] = cy * cz;
+    result.data[4] = cy * sz;
+    result.data[8] = -sy;
+
+    result.data[1] = sx * sy * cz - cx * sz;
+    result.data[5] = sx * sy * sz + cx * cz;
+    result.data[9] = sx * cy;
+
+    result.data[2] = cx * sy * cz + sx * sz;
+    result.data[6] = cx * sy * sz - sx * cz;
+    result.data[10] = cx * cy;
+
+    return result;
+}
+
+inline Mat4 ComposeTransform(const Vec3& translation, const Vec3& rotationDegrees) {
+    const Mat4 rot = RotationXYZ(rotationDegrees);
+    const Mat4 trans = Translation(translation);
+    return Multiply(trans, rot);
+}
+
 }  // namespace engine
+
