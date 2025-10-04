@@ -4,7 +4,7 @@
       "name": "crankshaft",
       "mesh": "3d/crankshaft.glb",
       "anchor": {
-        "position": [0.00184, 0.0696, 0.00014],
+        "position": [-0.00038, 0.08664, -0.00006],
         "rotationEuler": [0.0, 0.0, 0.0],
         "color": [0.63, 0.63, 0.68]
       }
@@ -13,7 +13,7 @@
       "name": "connecting_rod",
       "mesh": "3d/connecting_rod.glb",
       "anchor": {
-        "position": [0.00003, 0.11229, -0.00024],
+        "position": [0.00005, 0.10785, -0.00018],
         "rotationEuler": [0.0, 0.0, 0.0],
         "color": [0.74, 0.74, 0.78]
       }
@@ -22,7 +22,7 @@
       "name": "piston",
       "mesh": "3d/piston.glb",
       "anchor": {
-        "position": [0.00007, 0.02981, -0.00006],
+        "position": [0.00008, 0.1338, -0.00032],
         "rotationEuler": [0.0, 0.0, 0.0],
         "color": [0.82, 0.82, 0.86]
       }
@@ -31,7 +31,7 @@
       "name": "camshaft",
       "mesh": "3d/camshaft.glb",
       "anchor": {
-        "position": [-0.0045, 0.0, 0.0],
+        "position": [-0.0045, 0.18, 0.0],
         "rotationEuler": [0.0, 0.0, 0.0],
         "color": [0.55, 0.57, 0.6]
       }
@@ -40,7 +40,7 @@
       "name": "valve_subassemble",
       "mesh": "3d/valve_subassemble.glb",
       "anchor": {
-        "position": [-0.00003, 0.07717, 0.00006],
+        "position": [-0.00003, 0.25717, 0.00006],
         "rotationEuler": [0.0, 0.0, 0.0],
         "color": [0.78, 0.7, 0.62]
       }
