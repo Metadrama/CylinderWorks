@@ -12,6 +12,22 @@
     {
       "name": "connecting_rod",
       "mesh": "3d/connecting_rod.glb",
+      "parent": {
+        "name": "crankshaft",
+        "attachment": "crank_pin"
+      },
+      "attachments": {
+        "crank_pin": {
+          "self": {
+            "position": [0.0, 0.0, 0.0],
+            "rotationEuler": [0.0, 0.0, 0.0]
+          },
+          "parent": {
+            "position": [0.00043, 0.02121, -0.00012],
+            "rotationEuler": [0.0, 0.0, 0.0]
+          }
+        }
+      },
       "anchor": {
         "position": [0.00005, 0.10785, -0.00018],
         "rotationEuler": [0.0, 0.0, 0.0],
@@ -21,6 +37,22 @@
     {
       "name": "piston",
       "mesh": "3d/piston.glb",
+      "parent": {
+        "name": "connecting_rod",
+        "attachment": "wrist_pin"
+      },
+      "attachments": {
+        "wrist_pin": {
+          "self": {
+            "position": [0.0, 0.0, 0.0],
+            "rotationEuler": [0.0, 0.0, 0.0]
+          },
+          "parent": {
+            "position": [0.00003, 0.02595, -0.00014],
+            "rotationEuler": [0.0, 0.0, 0.0]
+          }
+        }
+      },
       "anchor": {
         "position": [0.00008, 0.1338, -0.00032],
         "rotationEuler": [0.0, 0.0, 0.0],
@@ -39,6 +71,22 @@
     {
       "name": "valve_subassemble",
       "mesh": "3d/valve_subassemble.glb",
+      "parent": {
+        "name": "camshaft",
+        "attachment": "tappet_mount"
+      },
+      "attachments": {
+        "tappet_mount": {
+          "self": {
+            "position": [0.0, 0.0, 0.0],
+            "rotationEuler": [0.0, 0.0, 0.0]
+          },
+          "parent": {
+            "position": [0.00447, 0.07717, 0.00006],
+            "rotationEuler": [0.0, 0.0, 0.0]
+          }
+        }
+      },
       "anchor": {
         "position": [-0.00003, 0.25717, 0.00006],
         "rotationEuler": [0.0, 0.0, 0.0],

@@ -215,5 +215,39 @@ inline Mat4 ComposeTransform(const Vec3& translation, const Vec3& rotationDegree
     return Multiply(trans, rot);
 }
 
+inline Mat4 InvertRigidTransform(const Mat4& transform) {
+    Mat4 result = Mat4::Identity();
+
+    // Extract rotation matrix (upper-left 3x3) and transpose it.
+    result.data[0] = transform.data[0];
+    result.data[1] = transform.data[4];
+    result.data[2] = transform.data[8];
+
+    result.data[4] = transform.data[1];
+    result.data[5] = transform.data[5];
+    result.data[6] = transform.data[9];
+
+    result.data[8] = transform.data[2];
+    result.data[9] = transform.data[6];
+    result.data[10] = transform.data[10];
+
+    const Vec3 translation{transform.data[12], transform.data[13], transform.data[14]};
+    const Vec3 rotated{
+        result.data[0] * translation.x + result.data[4] * translation.y + result.data[8] * translation.z,
+        result.data[1] * translation.x + result.data[5] * translation.y + result.data[9] * translation.z,
+        result.data[2] * translation.x + result.data[6] * translation.y + result.data[10] * translation.z
+    };
+
+    result.data[12] = -rotated.x;
+    result.data[13] = -rotated.y;
+    result.data[14] = -rotated.z;
+
+    return result;
+}
+
+inline Mat4 CombineAttachmentTransforms(const Mat4& parentAttachment, const Mat4& selfAttachment) {
+    return Multiply(parentAttachment, InvertRigidTransform(selfAttachment));
+}
+
 }  // namespace engine
 

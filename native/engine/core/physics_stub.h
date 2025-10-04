@@ -15,7 +15,11 @@ struct EngineControlInputs {
 
 struct PartAnchor {
     std::string name;
-    Mat4 transform{Mat4::Identity()};
+    std::string parentName;
+    std::string attachmentName;
+    Mat4 defaultTransform{Mat4::Identity()};
+    Mat4 selfAttachment{Mat4::Identity()};
+    Mat4 parentAttachment{Mat4::Identity()};
 };
 
 struct PartTransform {
