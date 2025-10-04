@@ -20,6 +20,16 @@ struct EnginePart {
     Vec3 color{0.7f, 0.7f, 0.7f};
     Mat4 anchorTransform{Mat4::Identity()};
     Mat4 currentTransform{Mat4::Identity()};
+    std::string parentName;
+    std::string parentAttachmentName;
+    size_t parentIndex{static_cast<size_t>(-1)};
+    Mat4 relativeAttachment{Mat4::Identity()};
+    bool hasRelativeAttachment{false};
+    struct AttachmentPair {
+        Mat4 self{Mat4::Identity()};
+        Mat4 parent{Mat4::Identity()};
+    };
+    std::unordered_map<std::string, AttachmentPair> attachments;
 
     EnginePart() = default;
     EnginePart(const EnginePart&) = delete;
@@ -47,6 +57,11 @@ private:
     bool LoadPart(AAssetManager* assetManager,
                   const std::string& basePath,
                   const JsonValue& partJson);
+
+    Mat4 ResolveDefaultTransform(size_t index,
+                                 std::vector<Mat4>* cache,
+                                 std::vector<uint8_t>* state) const;
+    std::vector<Mat4> BuildDefaultTransforms() const;
 
     std::vector<EnginePart> parts_;
     std::unordered_map<std::string, size_t> partLookup_;
