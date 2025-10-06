@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   ffi: ^2.1.0
+  xml: ^6.5.0
 
 dev_dependencies:
   flutter_test:
@@ -20,4 +21,4 @@ flutter:
   uses-material-design: true
   assets:
     - assets/engine/assembly.json
-    - assets/3d/
+    - assets/engine/parts/

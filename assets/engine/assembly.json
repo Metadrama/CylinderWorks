@@ -1,119 +1,244 @@
 {
   "parts": [
     {
-      "name": "crankshaft",
-      "mesh": "3d/crankshaft.glb",
+      "name": "camshaft",
+      "mesh": "engine/parts/camshaft.glb",
       "anchor": {
         "position": [
-          -0.00038,
-          0.08664,
-          -6e-05
+          0.0,
+          0.072,
+          -0.065
         ],
         "rotationEuler": [
+          -118.199941,
           0.0,
-          0.0,
-          0.0
+          180.0
         ],
         "color": [
-          0.63,
-          0.63,
-          0.68
+          0.776471,
+          0.756863,
+          0.737255
         ]
       }
     },
     {
       "name": "connecting_rod",
-      "mesh": "3d/connecting_rod.glb",
-      "parent": {
-        "name": "crankshaft",
-        "attachment": "crank_pin"
-      },
-      "attachments": {
-        "crank_pin": {
-          "self": {
-            "position": [
-              -5.986e-05,
-              -0.11812357,
-              0.00036483
-            ],
-            "rotationEuler": [
-              -0.05856271,
-              0.04070038,
-              0.04115805
-            ]
-          },
-          "parent": {
-            "position": [
-              -5.986e-05,
-              0.00656101,
-              0.01765817
-            ],
-            "rotationEuler": [
-              17.72634842,
-              0.04070038,
-              0.04115805
-            ]
-          }
-        }
-      },
+      "mesh": "engine/parts/connecting_rod.glb",
       "anchor": {
         "position": [
-          5e-05,
-          0.10785,
-          -0.00018
+          0.0,
+          0.158959,
+          0.0
         ],
         "rotationEuler": [
-          0.0,
+          -4.408181,
           0.0,
           0.0
         ],
         "color": [
-          0.74,
-          0.74,
-          0.78
+          0.639216,
+          0.666667,
+          0.678431
+        ]
+      }
+    },
+    {
+      "name": "driving_gear",
+      "mesh": "engine/parts/driving_gear.glb",
+      "anchor": {
+        "position": [
+          -0.107,
+          0.0,
+          0.0
+        ],
+        "rotationEuler": [
+          13.376728,
+          90.0,
+          0.0
+        ],
+        "color": [
+          0.980392,
+          1.0,
+          0.890196
+        ]
+      }
+    },
+    {
+      "name": "gear",
+      "mesh": "engine/parts/gear.glb",
+      "anchor": {
+        "position": [
+          -0.107,
+          0.072,
+          -0.065
+        ],
+        "rotationEuler": [
+          61.800059,
+          0.0,
+          0.0
+        ],
+        "color": [
+          0.827451,
+          0.666667,
+          0.129412
+        ]
+      }
+    },
+    {
+      "name": "shaft",
+      "mesh": "engine/parts/SHAFT.glb",
+      "anchor": {
+        "position": [
+          0.075,
+          0.300087,
+          -0.039727
+        ],
+        "rotationEuler": [
+          17.651285,
+          90.0,
+          0.0
+        ],
+        "color": [
+          0.839216,
+          0.466667,
+          0.368627
+        ]
+      }
+    },
+    {
+      "name": "rod",
+      "mesh": "engine/parts/rod.glb",
+      "anchor": {
+        "position": [
+          -0.015,
+          0.132702,
+          -0.065
+        ],
+        "rotationEuler": [
+          -90.0,
+          0.0,
+          0.0
+        ],
+        "color": [
+          1.0,
+          0.168627,
+          0.168627
+        ]
+      }
+    },
+    {
+      "name": "rod_2",
+      "mesh": "engine/parts/rod.glb",
+      "anchor": {
+        "position": [
+          0.015,
+          0.129,
+          -0.065
+        ],
+        "rotationEuler": [
+          -90.0,
+          0.0,
+          0.0
+        ],
+        "color": [
+          1.0,
+          0.168627,
+          0.168627
+        ]
+      }
+    },
+    {
+      "name": "rocker_arm",
+      "mesh": "engine/parts/rocker_arm.glb",
+      "anchor": {
+        "position": [
+          -0.015,
+          0.3,
+          -0.04
+        ],
+        "rotationEuler": [
+          168.801646,
+          0.0,
+          180.0
+        ],
+        "color": [
+          0.776471,
+          0.756863,
+          0.737255
+        ]
+      }
+    },
+    {
+      "name": "crankshaft",
+      "mesh": "engine/parts/crankshaft.glb",
+      "anchor": {
+        "position": [
+          0.0,
+          0.038915,
+          -0.009254
+        ],
+        "rotationEuler": [
+          13.376728,
+          0.0,
+          0.0
+        ],
+        "color": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "cover",
+      "mesh": "engine/parts/cover.glb",
+      "anchor": {
+        "position": [
+          0.0,
+          0.038915,
+          -0.009254
+        ],
+        "rotationEuler": [
+          175.591819,
+          -90.0,
+          0.0
+        ],
+        "color": [
+          0.792157,
+          0.819608,
+          0.933333
+        ]
+      }
+    },
+    {
+      "name": "pin",
+      "mesh": "engine/parts/pin.glb",
+      "anchor": {
+        "position": [
+          0.0,
+          0.158959,
+          0.0
+        ],
+        "rotationEuler": [
+          0.0,
+          0.0,
+          90.0
+        ],
+        "color": [
+          0.776471,
+          0.756863,
+          0.737255
         ]
       }
     },
     {
       "name": "piston",
-      "mesh": "3d/piston.glb",
-      "parent": {
-        "name": "connecting_rod",
-        "attachment": "wrist_pin"
-      },
-      "attachments": {
-        "wrist_pin": {
-          "self": {
-            "position": [
-              7.456e-05,
-              -0.02739744,
-              -3.71e-06
-            ],
-            "rotationEuler": [
-              0.13945125,
-              0.18982507,
-              0.18146528
-            ]
-          },
-          "parent": {
-            "position": [
-              7.456e-05,
-              0.01057148,
-              0.00081123
-            ],
-            "rotationEuler": [
-              -4.26872976,
-              0.18982507,
-              0.18146528
-            ]
-          }
-        }
-      },
+      "mesh": "engine/parts/piston.glb",
       "anchor": {
         "position": [
-          8e-05,
-          0.1338,
-          -0.00032
+          0.0,
+          0.196959,
+          0.0
         ],
         "rotationEuler": [
           0.0,
@@ -121,83 +246,177 @@
           0.0
         ],
         "color": [
-          0.82,
-          0.82,
-          0.86
+          1.0,
+          0.94902,
+          0.909804
         ]
       }
     },
     {
-      "name": "camshaft",
-      "mesh": "3d/camshaft.glb",
+      "name": "propeller",
+      "mesh": "engine/parts/propeller.glb",
       "anchor": {
         "position": [
-          -0.0045,
-          0.18,
-          0.0
+          0.330751,
+          0.062507,
+          -0.047295
         ],
         "rotationEuler": [
-          0.0,
-          0.0,
+          61.800059,
+          -90.0,
           0.0
         ],
         "color": [
-          0.55,
-          0.57,
-          0.6
+          0.639216,
+          0.666667,
+          0.678431
         ]
       }
     },
     {
-      "name": "valve_subassemble",
-      "mesh": "3d/valve_subassemble.glb",
-      "parent": {
-        "name": "camshaft",
-        "attachment": "tappet_mount"
-      },
-      "attachments": {
-        "tappet_mount": {
-          "self": {
-            "position": [
-              0.03592653,
-              0.00346828,
-              0.05845352
-            ],
-            "rotationEuler": [
-              -0.25616516,
-              -0.32238334,
-              0.02978195
-            ]
-          },
-          "parent": {
-            "position": [
-              0.05445799,
-              -0.03115131,
-              -0.16982841
-            ],
-            "rotationEuler": [
-              -117.88278269,
-              -36.13042674,
-              179.84133468
-            ]
-          }
-        }
-      },
+      "name": "retainer",
+      "mesh": "engine/parts/retainer.glb",
       "anchor": {
         "position": [
-          -3e-05,
-          0.25717,
-          6e-05
+          -0.015,
+          0.275884,
+          0.0
         ],
         "rotationEuler": [
           0.0,
-          0.0,
+          -38.953002,
           0.0
         ],
         "color": [
-          0.78,
-          0.7,
-          0.62
+          0.266667,
+          0.266667,
+          0.266667
+        ]
+      }
+    },
+    {
+      "name": "valve_spring_retainer",
+      "mesh": "engine/parts/valve_spring_retainer.glb",
+      "anchor": {
+        "position": [
+          -0.015,
+          0.275884,
+          0.0
+        ],
+        "rotationEuler": [
+          180.0,
+          -83.547128,
+          180.0
+        ],
+        "color": [
+          0.776471,
+          0.756863,
+          0.737255
+        ]
+      }
+    },
+    {
+      "name": "valve",
+      "mesh": "engine/parts/VALVE.glb",
+      "anchor": {
+        "position": [
+          -0.015,
+          0.278884,
+          0.0
+        ],
+        "rotationEuler": [
+          180.0,
+          -89.707336,
+          180.0
+        ],
+        "color": [
+          0.039216,
+          0.490196,
+          0.709804
+        ]
+      }
+    },
+    {
+      "name": "retainer_2",
+      "mesh": "engine/parts/retainer.glb",
+      "anchor": {
+        "position": [
+          0.015,
+          0.281883,
+          0.0
+        ],
+        "rotationEuler": [
+          0.0,
+          14.886435,
+          0.0
+        ],
+        "color": [
+          0.266667,
+          0.266667,
+          0.266667
+        ]
+      }
+    },
+    {
+      "name": "valve_spring_retainer_2",
+      "mesh": "engine/parts/valve_spring_retainer.glb",
+      "anchor": {
+        "position": [
+          0.015,
+          0.281883,
+          0.0
+        ],
+        "rotationEuler": [
+          0.0,
+          -42.613435,
+          0.0
+        ],
+        "color": [
+          0.776471,
+          0.756863,
+          0.737255
+        ]
+      }
+    },
+    {
+      "name": "valve_2",
+      "mesh": "engine/parts/VALVE.glb",
+      "anchor": {
+        "position": [
+          0.015,
+          0.284883,
+          0.0
+        ],
+        "rotationEuler": [
+          0.0,
+          -36.453227,
+          0.0
+        ],
+        "color": [
+          0.039216,
+          0.490196,
+          0.709804
+        ]
+      }
+    },
+    {
+      "name": "rocker_arm_2",
+      "mesh": "engine/parts/rocker_arm.glb",
+      "anchor": {
+        "position": [
+          0.015,
+          0.3,
+          -0.04
+        ],
+        "rotationEuler": [
+          177.673242,
+          0.0,
+          180.0
+        ],
+        "color": [
+          0.776471,
+          0.756863,
+          0.737255
         ]
       }
     }
