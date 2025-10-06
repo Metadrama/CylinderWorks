@@ -1,0 +1,20 @@
+Constrained Instances: 'pin-1', 'pin-1', 'piston-1', 'piston-1'
+Constraint Name: Width1
+Error Details: Constraint is not supported. The constraint has been ignored.
+---------------------------------------------------------------------------------
+Constrained Instances: 'crankshaft-1', 'crankshaft-1', 'connecting rod-1', 'connecting rod-1'
+Constraint Name: Width2
+Error Details: Constraint is not supported. The constraint has been ignored.
+---------------------------------------------------------------------------------
+Constrained Instances: 'camshaft-1', 'rod-2'
+Constraint Name: CamMateTangent2
+Error Details: Constraint is not supported. The constraint has been exported as unknown constraint.
+---------------------------------------------------------------------------------
+Constrained Instances: 'camshaft-1', 'rod-1'
+Constraint Name: CamMateTangent3
+Error Details: Constraint is not supported. The constraint has been exported as unknown constraint.
+---------------------------------------------------------------------------------
+Constrained Instances: 'driving gear-1', 'gear-1'
+Constraint Name: GearMate1
+Error Details: Constraint is not supported. The constraint has been exported as unknown constraint.
+---------------------------------------------------------------------------------
