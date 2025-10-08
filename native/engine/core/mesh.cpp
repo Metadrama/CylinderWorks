@@ -39,6 +39,7 @@ bool Mesh::Initialize(const std::vector<float>& positions,
     }
 
     const size_t vertexCount = positions.size() / 3;
+    const bool hasNormals = normals.size() == positions.size();
     std::vector<float> interleaved;
     interleaved.reserve(vertexCount * 6);
 
@@ -47,7 +48,7 @@ bool Mesh::Initialize(const std::vector<float>& positions,
         interleaved.push_back(positions[i * 3 + 1]);
         interleaved.push_back(positions[i * 3 + 2]);
 
-        if (!normals.empty()) {
+        if (hasNormals) {
             interleaved.push_back(normals[i * 3 + 0]);
             interleaved.push_back(normals[i * 3 + 1]);
             interleaved.push_back(normals[i * 3 + 2]);

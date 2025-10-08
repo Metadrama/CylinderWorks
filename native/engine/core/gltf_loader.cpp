@@ -384,61 +384,105 @@ bool LoadMeshFromGlb(AAssetManager* assetManager,
         return false;
     }
 
-    const JsonValue& mesh = meshes[0];
-    const JsonValue& primitives = mesh["primitives"];
-    if (!primitives.IsArray() || primitives.Size() == 0) {
-        if (outError) {
-            *outError = "Mesh contains no primitives";
-        }
-        __android_log_print(ANDROID_LOG_ERROR, kTag, "GLB '%s' mesh[0] has no primitives", assetPath.c_str());
-        return false;
-    }
-
-    const JsonValue& primitive = primitives[0];
-    const JsonValue& attributes = primitive["attributes"];
-    if (!attributes.IsObject()) {
-        if (outError) {
-            *outError = "Primitive missing attributes";
-        }
-        __android_log_print(ANDROID_LOG_ERROR, kTag, "GLB '%s' primitive missing attributes", assetPath.c_str());
-        return false;
-    }
-
-    const int positionAccessor = static_cast<int>(attributes["POSITION"].AsNumber(-1));
-    if (positionAccessor < 0) {
-        if (outError) {
-            *outError = "Primitive missing POSITION attribute";
-        }
-        __android_log_print(ANDROID_LOG_ERROR, kTag, "GLB '%s' primitive missing POSITION", assetPath.c_str());
-        return false;
-    }
-
-    AccessorView positionView;
-    if (!ResolveAccessor(document, positionAccessor, chunks.bin, &positionView, outError)) {
-        return false;
-    }
-
     std::vector<float> positions;
-    if (!ExtractAttribute(positionView, &positions, 3, outError)) {
-        return false;
-    }
-
     std::vector<float> normals;
-    const int normalAccessor = static_cast<int>(attributes["NORMAL"].AsNumber(-1));
-    if (normalAccessor >= 0) {
-        AccessorView normalView;
-        if (ResolveAccessor(document, normalAccessor, chunks.bin, &normalView, outError)) {
-            ExtractAttribute(normalView, &normals, 3, outError);
+    std::vector<uint32_t> indices;
+
+    for (size_t meshIndex = 0; meshIndex < meshes.Size(); ++meshIndex) {
+        const JsonValue& mesh = meshes[static_cast<int>(meshIndex)];
+        const JsonValue& primitives = mesh["primitives"];
+        if (!primitives.IsArray() || primitives.Size() == 0) {
+            continue;
+        }
+
+        for (size_t primitiveIndex = 0; primitiveIndex < primitives.Size(); ++primitiveIndex) {
+            const JsonValue& primitive = primitives[static_cast<int>(primitiveIndex)];
+            const JsonValue& attributes = primitive["attributes"];
+            if (!attributes.IsObject()) {
+                if (outError) {
+                    *outError = "Primitive missing attributes";
+                }
+                __android_log_print(ANDROID_LOG_ERROR,
+                                    kTag,
+                                    "GLB '%s' primitive missing attributes",
+                                    assetPath.c_str());
+                return false;
+            }
+
+            const int positionAccessor = static_cast<int>(attributes["POSITION"].AsNumber(-1));
+            if (positionAccessor < 0) {
+                if (outError) {
+                    *outError = "Primitive missing POSITION attribute";
+                }
+                __android_log_print(ANDROID_LOG_ERROR,
+                                    kTag,
+                                    "GLB '%s' primitive missing POSITION",
+                                    assetPath.c_str());
+                return false;
+            }
+
+            AccessorView positionView;
+            if (!ResolveAccessor(document, positionAccessor, chunks.bin, &positionView, outError)) {
+                return false;
+            }
+
+            std::vector<float> primitivePositions;
+            if (!ExtractAttribute(positionView, &primitivePositions, 3, outError)) {
+                return false;
+            }
+
+            const size_t vertexBase = positions.size() / 3;
+            const size_t vertexCount = primitivePositions.size() / 3;
+            positions.insert(positions.end(), primitivePositions.begin(), primitivePositions.end());
+
+            std::vector<float> primitiveNormals;
+            bool hasPrimitiveNormals = false;
+            const int normalAccessor = static_cast<int>(attributes["NORMAL"].AsNumber(-1));
+            if (normalAccessor >= 0) {
+                AccessorView normalView;
+                if (ResolveAccessor(document, normalAccessor, chunks.bin, &normalView, outError)) {
+                    if (ExtractAttribute(normalView, &primitiveNormals, 3, outError)) {
+                        hasPrimitiveNormals = (primitiveNormals.size() == primitivePositions.size());
+                    }
+                }
+            }
+
+            if (hasPrimitiveNormals) {
+                normals.insert(normals.end(), primitiveNormals.begin(), primitiveNormals.end());
+            } else {
+                for (size_t i = 0; i < vertexCount; ++i) {
+                    normals.push_back(0.0f);
+                    normals.push_back(1.0f);
+                    normals.push_back(0.0f);
+                }
+            }
+
+            std::vector<uint32_t> primitiveIndices;
+            const int indexAccessor = static_cast<int>(primitive["indices"].AsNumber(-1));
+            if (indexAccessor >= 0) {
+                AccessorView indexView;
+                if (ResolveAccessor(document, indexAccessor, chunks.bin, &indexView, outError)) {
+                    ExtractIndices(indexView, &primitiveIndices, outError);
+                }
+            }
+
+            if (!primitiveIndices.empty()) {
+                for (uint32_t index : primitiveIndices) {
+                    indices.push_back(static_cast<uint32_t>(vertexBase) + index);
+                }
+            } else {
+                for (size_t i = 0; i < vertexCount; ++i) {
+                    indices.push_back(static_cast<uint32_t>(vertexBase + i));
+                }
+            }
         }
     }
 
-    std::vector<uint32_t> indices;
-    const int indexAccessor = static_cast<int>(primitive["indices"].AsNumber(-1));
-    if (indexAccessor >= 0) {
-        AccessorView indexView;
-        if (ResolveAccessor(document, indexAccessor, chunks.bin, &indexView, outError)) {
-            ExtractIndices(indexView, &indices, outError);
+    if (positions.empty()) {
+        if (outError) {
+            *outError = "GLB contains no mesh vertex data";
         }
+        return false;
     }
 
     outData->positions = std::move(positions);
