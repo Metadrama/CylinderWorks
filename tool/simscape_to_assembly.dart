@@ -64,6 +64,7 @@ void main(List<String> args) {
   }
 
   final parts = <_PartInstance>[];
+  final instanceLookup = <String, _PartInstance>{};
   for (final instance
       in instanceTree.findElements('Instance', namespace: namespace)) {
     _traverseInstance(
@@ -73,6 +74,7 @@ void main(List<String> args) {
       partInfos,
       namespace,
       zeroRotations,
+      instanceLookup,
     );
   }
 
@@ -99,6 +101,11 @@ void main(List<String> args) {
         ? part.sanitizedBase
         : '${part.sanitizedBase}_${count + 1}';
 
+    part.outputName = name;
+    if (part.instanceUid != null) {
+      instanceLookup[part.instanceUid!] = part;
+    }
+
     outputParts.add({
       'name': name,
       'mesh': meshPath,
@@ -116,8 +123,28 @@ void main(List<String> args) {
     return;
   }
 
+  String? rootAssemblyUid;
+  final rootAssemblyIterator =
+      document.findAllElements('RootAssembly', namespace: namespace).iterator;
+  if (rootAssemblyIterator.moveNext()) {
+    rootAssemblyUid = rootAssemblyIterator.current.getAttribute('uid');
+  }
+
+  final constraints = _extractConstraints(
+    document,
+    namespace,
+    instanceLookup,
+    rootAssemblyUid,
+  );
+
   final encoder = JsonEncoder.withIndent('  ');
-  final outputJson = encoder.convert({'parts': outputParts});
+  final outputPayload = <String, dynamic>{
+    'parts': outputParts,
+  };
+  if (constraints.isNotEmpty) {
+    outputPayload['constraints'] = constraints;
+  }
+  final outputJson = encoder.convert(outputPayload);
   File(outputPath).writeAsStringSync('$outputJson\n');
   stdout.writeln(
       'Wrote ${outputParts.length} part entries derived from ${parts.length} instances to $outputPath');
@@ -188,11 +215,13 @@ void _traverseInstance(
   Map<String, _PartInfo> parts,
   String namespace,
   bool zeroRotations,
+  Map<String, _PartInstance> instanceLookup,
 ) {
   final localTransform = _parseTransform(element, namespace);
   final worldTransform = parent.multiplied(localTransform);
 
   final entityUid = element.getAttribute('entityUid');
+  final instanceUid = element.getAttribute('uid');
   if (entityUid != null) {
     final partInfo = parts[entityUid];
     if (partInfo != null) {
@@ -204,14 +233,153 @@ void _traverseInstance(
             ? <double>[0.0, 0.0, 0.0]
             : _rotationToEuler(worldTransform.rotation),
         color: List<double>.from(partInfo.color, growable: false),
+        entityUid: entityUid,
+        instanceUid: instanceUid,
       ));
+      final part = out.last;
+      if (part.instanceUid != null) {
+        instanceLookup.putIfAbsent(part.instanceUid!, () => part);
+      }
     }
   }
 
   for (final child in element.findElements('Instance', namespace: namespace)) {
     _traverseInstance(
-        child, worldTransform, out, parts, namespace, zeroRotations);
+      child,
+      worldTransform,
+      out,
+      parts,
+      namespace,
+      zeroRotations,
+      instanceLookup,
+    );
   }
+}
+
+List<Map<String, dynamic>> _extractConstraints(
+  XmlDocument document,
+  String namespace,
+  Map<String, _PartInstance> instanceLookup,
+  String? rootAssemblyUid,
+) {
+  final iterator =
+      document.findAllElements('Constraints', namespace: namespace).iterator;
+  if (!iterator.moveNext()) {
+    return <Map<String, dynamic>>[];
+  }
+
+  final constraintsElement = iterator.current;
+  final result = <Map<String, dynamic>>[];
+
+  for (final constraintElement in constraintsElement.children.whereType<XmlElement>()) {
+    final type = constraintElement.name.local;
+    final name = constraintElement.getAttribute('name') ?? type;
+
+    final geometries = <Map<String, dynamic>>[];
+    for (final geometry
+        in constraintElement.findElements('ConstraintGeometry', namespace: namespace)) {
+      final parsed = _parseConstraintGeometry(
+        geometry,
+        namespace,
+        instanceLookup,
+        rootAssemblyUid,
+      );
+      if (parsed != null) {
+        geometries.add(parsed);
+      }
+    }
+
+    if (geometries.length >= 2) {
+      result.add({
+        'name': name,
+        'type': type,
+        'geometries': geometries,
+      });
+    }
+  }
+
+  return result;
+}
+
+Map<String, dynamic>? _parseConstraintGeometry(
+  XmlElement geometry,
+  String namespace,
+  Map<String, _PartInstance> instanceLookup,
+  String? rootAssemblyUid,
+) {
+  final instancePathElement =
+      geometry.getElement('InstancePath', namespace: namespace);
+  if (instancePathElement == null) {
+    return null;
+  }
+
+  final path = <String>[];
+  for (final uidElement
+      in instancePathElement.findElements('Uid', namespace: namespace)) {
+    final text = uidElement.text.trim();
+    if (text.isNotEmpty) {
+      path.add(text);
+    }
+  }
+
+  if (path.isEmpty) {
+    return null;
+  }
+
+  _PartInstance? part;
+  String? resolvedUid;
+  for (final candidate in path.reversed) {
+    final lookup = instanceLookup[candidate];
+    if (lookup != null) {
+      part = lookup;
+      resolvedUid = candidate;
+      break;
+    }
+  }
+  resolvedUid ??= path.last;
+
+  final positionElement = geometry.getElement('Position', namespace: namespace);
+  List<double>? position;
+  if (positionElement != null) {
+    final parsed = _parseNumericList(positionElement.text, expected: 3);
+    if (parsed.length == 3) {
+      position = _roundVector(parsed);
+    }
+  }
+
+  final axisElement = geometry.getElement('Axis', namespace: namespace);
+  List<double>? axis;
+  if (axisElement != null) {
+    final parsed = _parseNumericList(axisElement.text, expected: 3);
+    if (parsed.length == 3) {
+      axis = _roundVector(parsed);
+    }
+  }
+
+  final payload = <String, dynamic>{
+    'geometry': geometry.getAttribute('geomType') ?? '',
+    'instancePath': path,
+    'instanceUid': resolvedUid,
+  };
+
+  if (part != null) {
+    if (part.outputName != null) {
+      payload['part'] = part.outputName;
+    }
+    payload['entityUid'] = part.entityUid;
+  }
+
+  if (position != null) {
+    payload['position'] = position;
+  }
+  if (axis != null) {
+    payload['axis'] = axis;
+  }
+  if (rootAssemblyUid != null && resolvedUid == rootAssemblyUid) {
+    payload['ground'] = true;
+  }
+
+  return payload;
 }
 
 _Transform _parseTransform(XmlElement element, String namespace) {
@@ -428,6 +596,8 @@ class _PartInstance {
     required this.position,
     required this.rotationEuler,
     required this.color,
+    required this.entityUid,
+    required this.instanceUid,
   });
 
   final String sanitizedBase;
@@ -435,4 +605,7 @@ class _PartInstance {
   final List<double> position;
   final List<double> rotationEuler;
   final List<double> color;
+  final String entityUid;
+  final String? instanceUid;
+  String? outputName;
 }

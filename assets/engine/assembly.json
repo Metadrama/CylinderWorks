@@ -420,5 +420,2052 @@
         ]
       }
     }
+  ],
+  "constraints": [
+    {
+      "name": "Concentric1",
+      "type": "Concentric",
+      "geometries": [
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "crankshaft-1"
+          ],
+          "instanceUid": "crankshaft-1",
+          "part": "crankshaft",
+          "entityUid": "crankshaft*:*Default",
+          "position": [
+            -0.125,
+            -0.04,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "geometry": "line",
+          "instancePath": [
+            "Assem1"
+          ],
+          "instanceUid": "Assem1",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "ground": true
+        }
+      ]
+    },
+    {
+      "name": "Coincident1",
+      "type": "Coincident",
+      "geometries": [
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "crankshaft-1"
+          ],
+          "instanceUid": "crankshaft-1",
+          "part": "crankshaft",
+          "entityUid": "crankshaft*:*Default",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "Assem1"
+          ],
+          "instanceUid": "Assem1",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "ground": true
+        }
+      ]
+    },
+    {
+      "name": "Concentric2",
+      "type": "Concentric",
+      "geometries": [
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "connecting rod-1"
+          ],
+          "instanceUid": "connecting rod-1",
+          "part": "connecting_rod",
+          "entityUid": "connecting rod*:*Default",
+          "position": [
+            0.01,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "piston-1"
+          ],
+          "instanceUid": "piston-1",
+          "part": "piston",
+          "entityUid": "piston*:*Default",
+          "position": [
+            -0.035,
+            -0.038,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Coincident2",
+      "type": "Coincident",
+      "geometries": [
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "connecting rod-1"
+          ],
+          "instanceUid": "connecting rod-1",
+          "part": "connecting_rod",
+          "entityUid": "connecting rod*:*Default",
+          "position": [
+            -0.01,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "piston-1"
+          ],
+          "instanceUid": "piston-1",
+          "part": "piston",
+          "entityUid": "piston*:*Default",
+          "position": [
+            -0.01,
+            -0.038,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Concentric3",
+      "type": "Concentric",
+      "geometries": [
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "pin-1"
+          ],
+          "instanceUid": "pin-1",
+          "part": "pin",
+          "entityUid": "pin*:*Default",
+          "position": [
+            0.0,
+            0.024,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            -1.0,
+            0.0
+          ]
+        },
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "piston-1"
+          ],
+          "instanceUid": "piston-1",
+          "part": "piston",
+          "entityUid": "piston*:*Default",
+          "position": [
+            -0.035,
+            -0.038,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Coincident4",
+      "type": "Coincident",
+      "geometries": [
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "connecting rod-1"
+          ],
+          "instanceUid": "connecting rod-1",
+          "part": "connecting_rod",
+          "entityUid": "connecting rod*:*Default",
+          "position": [
+            0.015,
+            -0.1204,
+            0.0225
+          ],
+          "axis": [
+            0.0,
+            -1.0,
+            0.0
+          ]
+        },
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "cover-1"
+          ],
+          "instanceUid": "cover-1",
+          "part": "cover",
+          "entityUid": "cover*:*Default",
+          "position": [
+            0.0225,
+            0.0,
+            0.015
+          ],
+          "axis": [
+            0.0,
+            -1.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Concentric4",
+      "type": "Concentric",
+      "geometries": [
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "connecting rod-1"
+          ],
+          "instanceUid": "connecting rod-1",
+          "part": "connecting_rod",
+          "entityUid": "connecting rod*:*Default",
+          "position": [
+            0.0,
+            -0.1204,
+            0.029
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "cover-1"
+          ],
+          "instanceUid": "cover-1",
+          "part": "cover",
+          "entityUid": "cover*:*Default",
+          "position": [
+            0.029,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Concentric5",
+      "type": "Concentric",
+      "geometries": [
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "connecting rod-1"
+          ],
+          "instanceUid": "connecting rod-1",
+          "part": "connecting_rod",
+          "entityUid": "connecting rod*:*Default",
+          "position": [
+            0.0,
+            -0.1204,
+            -0.029
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "cover-1"
+          ],
+          "instanceUid": "cover-1",
+          "part": "cover",
+          "entityUid": "cover*:*Default",
+          "position": [
+            -0.029,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Coincident5",
+      "type": "Coincident",
+      "geometries": [
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "connecting rod-1"
+          ],
+          "instanceUid": "connecting rod-1",
+          "part": "connecting_rod",
+          "entityUid": "connecting rod*:*Default",
+          "position": [
+            0.015,
+            0.0,
+            -0.035
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ]
+        },
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "cover-1"
+          ],
+          "instanceUid": "cover-1",
+          "part": "cover",
+          "entityUid": "cover*:*Default",
+          "position": [
+            -0.035,
+            0.003,
+            0.015
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Concentric6",
+      "type": "Concentric",
+      "geometries": [
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "crankshaft-1"
+          ],
+          "instanceUid": "crankshaft-1",
+          "part": "crankshaft",
+          "entityUid": "crankshaft*:*Default",
+          "position": [
+            0.015,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "cover-1"
+          ],
+          "instanceUid": "cover-1",
+          "part": "cover",
+          "entityUid": "cover*:*Default",
+          "position": [
+            0.0,
+            0.0,
+            0.015
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Coincident6",
+      "type": "Coincident",
+      "geometries": [
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "crankshaft-1"
+          ],
+          "instanceUid": "crankshaft-1",
+          "part": "crankshaft",
+          "entityUid": "crankshaft*:*Default",
+          "position": [
+            -0.125,
+            -0.04,
+            0.0
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "camshaft-1"
+          ],
+          "instanceUid": "camshaft-1",
+          "part": "camshaft",
+          "entityUid": "camshaft*:*Default",
+          "position": [
+            0.125,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Concentric7",
+      "type": "Concentric",
+      "geometries": [
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "camshaft-1"
+          ],
+          "instanceUid": "camshaft-1",
+          "part": "camshaft",
+          "entityUid": "camshaft*:*Default",
+          "position": [
+            0.125,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "geometry": "point",
+          "instancePath": [
+            "Assem1"
+          ],
+          "instanceUid": "Assem1",
+          "position": [
+            -0.125,
+            0.072,
+            -0.065
+          ],
+          "ground": true
+        }
+      ]
+    },
+    {
+      "name": "Concentric8",
+      "type": "Concentric",
+      "geometries": [
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "crankshaft-1"
+          ],
+          "instanceUid": "crankshaft-1",
+          "part": "crankshaft",
+          "entityUid": "crankshaft*:*Default",
+          "position": [
+            -0.125,
+            -0.04,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "driving gear-1"
+          ],
+          "instanceUid": "driving gear-1",
+          "part": "driving_gear",
+          "entityUid": "driving gear*:*Default",
+          "position": [
+            0.0,
+            0.0,
+            -0.018
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Coincident11",
+      "type": "Coincident",
+      "geometries": [
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "crankshaft-1"
+          ],
+          "instanceUid": "crankshaft-1",
+          "part": "crankshaft",
+          "entityUid": "crankshaft*:*Default",
+          "position": [
+            -0.125,
+            -0.04,
+            0.0
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "driving gear-1"
+          ],
+          "instanceUid": "driving gear-1",
+          "part": "driving_gear",
+          "entityUid": "driving gear*:*Default",
+          "position": [
+            0.0,
+            0.0,
+            0.018
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Coincident12",
+      "type": "Coincident",
+      "geometries": [
+        {
+          "geometry": "line",
+          "instancePath": [
+            "crankshaft-1"
+          ],
+          "instanceUid": "crankshaft-1",
+          "part": "crankshaft",
+          "entityUid": "crankshaft*:*Default",
+          "position": [
+            -0.097,
+            -0.028157,
+            -0.004
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "geometry": "line",
+          "instancePath": [
+            "driving gear-1"
+          ],
+          "instanceUid": "driving gear-1",
+          "part": "driving_gear",
+          "entityUid": "driving gear*:*Default",
+          "position": [
+            -0.004,
+            0.011843,
+            -0.018
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Concentric9",
+      "type": "Concentric",
+      "geometries": [
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "camshaft-1"
+          ],
+          "instanceUid": "camshaft-1",
+          "part": "camshaft",
+          "entityUid": "camshaft*:*Default",
+          "position": [
+            0.125,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "gear-1"
+          ],
+          "instanceUid": "gear-1",
+          "part": "gear",
+          "entityUid": "gear*:*Default",
+          "position": [
+            -0.018,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Coincident13",
+      "type": "Coincident",
+      "geometries": [
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "camshaft-1"
+          ],
+          "instanceUid": "camshaft-1",
+          "part": "camshaft",
+          "entityUid": "camshaft*:*Default",
+          "position": [
+            0.125,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "gear-1"
+          ],
+          "instanceUid": "gear-1",
+          "part": "gear",
+          "entityUid": "gear*:*Default",
+          "position": [
+            -0.018,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Coincident14",
+      "type": "Coincident",
+      "geometries": [
+        {
+          "geometry": "line",
+          "instancePath": [
+            "camshaft-1"
+          ],
+          "instanceUid": "camshaft-1",
+          "part": "camshaft",
+          "entityUid": "camshaft*:*Default",
+          "position": [
+            0.117,
+            0.009165,
+            0.004
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "geometry": "line",
+          "instancePath": [
+            "gear-1"
+          ],
+          "instanceUid": "gear-1",
+          "part": "gear",
+          "entityUid": "gear*:*Default",
+          "position": [
+            -0.018,
+            0.009165,
+            -0.004
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Concentric11",
+      "type": "Concentric",
+      "geometries": [
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "SHAFT-1"
+          ],
+          "instanceUid": "SHAFT-1",
+          "part": "shaft",
+          "entityUid": "SHAFT*:*Default",
+          "position": [
+            -0.000286,
+            0.0,
+            0.2
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ]
+        },
+        {
+          "geometry": "point",
+          "instancePath": [
+            "Assem1"
+          ],
+          "instanceUid": "Assem1",
+          "position": [
+            0.0,
+            0.3,
+            -0.04
+          ],
+          "ground": true
+        }
+      ]
+    },
+    {
+      "name": "Coincident16",
+      "type": "Coincident",
+      "geometries": [
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "camshaft-1"
+          ],
+          "instanceUid": "camshaft-1",
+          "part": "camshaft",
+          "entityUid": "camshaft*:*Default",
+          "position": [
+            0.125,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "SHAFT-1"
+          ],
+          "instanceUid": "SHAFT-1",
+          "part": "shaft",
+          "entityUid": "SHAFT*:*Default",
+          "position": [
+            -0.000286,
+            0.0,
+            0.2
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Concentric12",
+      "type": "Concentric",
+      "geometries": [
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "piston-1"
+          ],
+          "instanceUid": "piston-1",
+          "part": "piston",
+          "entityUid": "piston*:*Default",
+          "position": [
+            0.0,
+            -0.0075,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            -1.0,
+            0.0
+          ]
+        },
+        {
+          "geometry": "line",
+          "instancePath": [
+            "Assem1"
+          ],
+          "instanceUid": "Assem1",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "ground": true
+        }
+      ]
+    },
+    {
+      "name": "Concentric13",
+      "type": "Concentric",
+      "geometries": [
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "SHAFT-1"
+          ],
+          "instanceUid": "SHAFT-1",
+          "part": "shaft",
+          "entityUid": "SHAFT*:*Default",
+          "position": [
+            -0.000286,
+            0.0,
+            0.2
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ]
+        },
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "Assem1"
+          ],
+          "instanceUid": "Assem1",
+          "position": [
+            -0.005,
+            0.3,
+            -0.04
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "ground": true
+        }
+      ]
+    },
+    {
+      "name": "Coincident18",
+      "type": "Coincident",
+      "geometries": [
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "SHAFT-1"
+          ],
+          "instanceUid": "SHAFT-1",
+          "part": "shaft",
+          "entityUid": "SHAFT*:*Default",
+          "position": [
+            0.0,
+            0.0,
+            0.08
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "Assem1"
+          ],
+          "instanceUid": "Assem1",
+          "position": [
+            -0.005,
+            0.3,
+            -0.04
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "ground": true
+        }
+      ]
+    },
+    {
+      "name": "Concentric14",
+      "type": "Concentric",
+      "geometries": [
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "SHAFT-1"
+          ],
+          "instanceUid": "SHAFT-1",
+          "part": "shaft",
+          "entityUid": "SHAFT*:*Default",
+          "position": [
+            -0.000286,
+            0.0,
+            0.2
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ]
+        },
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "Assem1"
+          ],
+          "instanceUid": "Assem1",
+          "position": [
+            0.025,
+            0.3,
+            -0.04
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "ground": true
+        }
+      ]
+    },
+    {
+      "name": "Coincident19",
+      "type": "Coincident",
+      "geometries": [
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "SHAFT-1"
+          ],
+          "instanceUid": "SHAFT-1",
+          "part": "shaft",
+          "entityUid": "SHAFT*:*Default",
+          "position": [
+            0.0,
+            0.0,
+            0.07
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ]
+        },
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "Assem1"
+          ],
+          "instanceUid": "Assem1",
+          "position": [
+            0.005,
+            0.3,
+            -0.04
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "ground": true
+        }
+      ]
+    },
+    {
+      "name": "Parallel1",
+      "type": "Parallel",
+      "geometries": [
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "rod-2"
+          ],
+          "instanceUid": "rod-2",
+          "part": "rod_2",
+          "entityUid": "rod*:*Default",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "Assem1"
+          ],
+          "instanceUid": "Assem1",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "ground": true
+        }
+      ]
+    },
+    {
+      "name": "Parallel2",
+      "type": "Parallel",
+      "geometries": [
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "rod-1"
+          ],
+          "instanceUid": "rod-1",
+          "part": "rod",
+          "entityUid": "rod*:*Default",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "Assem1"
+          ],
+          "instanceUid": "Assem1",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "ground": true
+        }
+      ]
+    },
+    {
+      "name": "Concentric15",
+      "type": "Concentric",
+      "geometries": [
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "rod-2"
+          ],
+          "instanceUid": "rod-2",
+          "part": "rod_2",
+          "entityUid": "rod*:*Default",
+          "position": [
+            0.0,
+            0.0,
+            0.045
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ]
+        },
+        {
+          "geometry": "line",
+          "instancePath": [
+            "Assem1"
+          ],
+          "instanceUid": "Assem1",
+          "position": [
+            0.015,
+            -0.015157,
+            -0.065
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "ground": true
+        }
+      ]
+    },
+    {
+      "name": "Concentric16",
+      "type": "Concentric",
+      "geometries": [
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "rod-1"
+          ],
+          "instanceUid": "rod-1",
+          "part": "rod",
+          "entityUid": "rod*:*Default",
+          "position": [
+            0.0,
+            0.0,
+            0.045
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ]
+        },
+        {
+          "geometry": "line",
+          "instancePath": [
+            "Assem1"
+          ],
+          "instanceUid": "Assem1",
+          "position": [
+            -0.015,
+            -0.015157,
+            -0.065
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "ground": true
+        }
+      ]
+    },
+    {
+      "name": "CamMateTangent2",
+      "type": "UnknownConstraint",
+      "geometries": [
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "camshaft-1"
+          ],
+          "instanceUid": "camshaft-1",
+          "part": "camshaft",
+          "entityUid": "camshaft*:*Default",
+          "position": [
+            -0.0225,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "rod-2"
+          ],
+          "instanceUid": "rod-2",
+          "part": "rod_2",
+          "entityUid": "rod*:*Default",
+          "position": [
+            0.0,
+            0.0,
+            0.045
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "CamMateTangent3",
+      "type": "UnknownConstraint",
+      "geometries": [
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "camshaft-1"
+          ],
+          "instanceUid": "camshaft-1",
+          "part": "camshaft",
+          "entityUid": "camshaft*:*Default",
+          "position": [
+            0.0225,
+            -0.003656,
+            -0.001622
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "rod-1"
+          ],
+          "instanceUid": "rod-1",
+          "part": "rod",
+          "entityUid": "rod*:*Default",
+          "position": [
+            0.0,
+            0.0,
+            0.045
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Concentric17",
+      "type": "Concentric",
+      "geometries": [
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "SHAFT-1"
+          ],
+          "instanceUid": "SHAFT-1",
+          "part": "shaft",
+          "entityUid": "SHAFT*:*Default",
+          "position": [
+            -0.000286,
+            0.0,
+            0.2
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ]
+        },
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "rocker arm-3"
+          ],
+          "instanceUid": "rocker arm-3",
+          "part": "rocker_arm",
+          "entityUid": "rocker arm*:*Default",
+          "position": [
+            0.01,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Coincident24",
+      "type": "Coincident",
+      "geometries": [
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "SHAFT-1"
+          ],
+          "instanceUid": "SHAFT-1",
+          "part": "shaft",
+          "entityUid": "SHAFT*:*Default",
+          "position": [
+            0.0,
+            0.0,
+            0.08
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "rocker arm-3"
+          ],
+          "instanceUid": "rocker arm-3",
+          "part": "rocker_arm",
+          "entityUid": "rocker arm*:*Default",
+          "position": [
+            -0.01,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Concentric18",
+      "type": "Concentric",
+      "geometries": [
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "SHAFT-1"
+          ],
+          "instanceUid": "SHAFT-1",
+          "part": "shaft",
+          "entityUid": "SHAFT*:*Default",
+          "position": [
+            -0.000286,
+            0.0,
+            0.2
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ]
+        },
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "Assem1"
+          ],
+          "instanceUid": "Assem1",
+          "position": [
+            0.025,
+            0.3,
+            -0.04
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "ground": true
+        }
+      ]
+    },
+    {
+      "name": "Coincident25",
+      "type": "Coincident",
+      "geometries": [
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "SHAFT-1"
+          ],
+          "instanceUid": "SHAFT-1",
+          "part": "shaft",
+          "entityUid": "SHAFT*:*Default",
+          "position": [
+            0.0,
+            0.0,
+            0.07
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ]
+        },
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "Assem1"
+          ],
+          "instanceUid": "Assem1",
+          "position": [
+            0.005,
+            0.3,
+            -0.04
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "ground": true
+        }
+      ]
+    },
+    {
+      "name": "Tangent3",
+      "type": "Tangent",
+      "geometries": [
+        {
+          "geometry": "circle",
+          "instancePath": [
+            "rod-1"
+          ],
+          "instanceUid": "rod-1",
+          "part": "rod",
+          "entityUid": "rod*:*Default",
+          "position": [
+            -0.0025,
+            0.0047,
+            -0.164
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "rocker arm-3"
+          ],
+          "instanceUid": "rocker arm-3",
+          "part": "rocker_arm",
+          "entityUid": "rocker arm*:*Default",
+          "position": [
+            0.0,
+            -0.005,
+            0.025
+          ],
+          "axis": [
+            0.0,
+            -1.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Concentric20",
+      "type": "Concentric",
+      "geometries": [
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "SHAFT-1"
+          ],
+          "instanceUid": "SHAFT-1",
+          "part": "shaft",
+          "entityUid": "SHAFT*:*Default",
+          "position": [
+            -0.000286,
+            0.0,
+            0.2
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ]
+        },
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "rocker arm-5"
+          ],
+          "instanceUid": "rocker arm-5",
+          "part": "rocker_arm_2",
+          "entityUid": "rocker arm*:*Default",
+          "position": [
+            0.01,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Coincident26",
+      "type": "Coincident",
+      "geometries": [
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "SHAFT-1"
+          ],
+          "instanceUid": "SHAFT-1",
+          "part": "shaft",
+          "entityUid": "SHAFT*:*Default",
+          "position": [
+            0.0,
+            0.0,
+            0.07
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ]
+        },
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "rocker arm-5"
+          ],
+          "instanceUid": "rocker arm-5",
+          "part": "rocker_arm_2",
+          "entityUid": "rocker arm*:*Default",
+          "position": [
+            0.01,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Tangent4",
+      "type": "Tangent",
+      "geometries": [
+        {
+          "geometry": "circle",
+          "instancePath": [
+            "rod-2"
+          ],
+          "instanceUid": "rod-2",
+          "part": "rod_2",
+          "entityUid": "rod*:*Default",
+          "position": [
+            -0.0025,
+            0.0047,
+            -0.164
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "rocker arm-5"
+          ],
+          "instanceUid": "rocker arm-5",
+          "part": "rocker_arm_2",
+          "entityUid": "rocker arm*:*Default",
+          "position": [
+            0.0,
+            -0.005,
+            0.025
+          ],
+          "axis": [
+            0.0,
+            -1.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Concentric21",
+      "type": "Concentric",
+      "geometries": [
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "valve subassemble-1",
+            "VALVE-1"
+          ],
+          "instanceUid": "VALVE-1",
+          "part": "valve_2",
+          "entityUid": "VALVE*:*Default",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "geometry": "line",
+          "instancePath": [
+            "Assem1"
+          ],
+          "instanceUid": "Assem1",
+          "position": [
+            0.015,
+            0.2,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "ground": true
+        }
+      ]
+    },
+    {
+      "name": "Concentric22",
+      "type": "Concentric",
+      "geometries": [
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "valve subassemble-2",
+            "VALVE-1"
+          ],
+          "instanceUid": "VALVE-1",
+          "part": "valve_2",
+          "entityUid": "VALVE*:*Default",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "geometry": "line",
+          "instancePath": [
+            "Assem1"
+          ],
+          "instanceUid": "Assem1",
+          "position": [
+            -0.015,
+            0.2,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "ground": true
+        }
+      ]
+    },
+    {
+      "name": "Tangent5",
+      "type": "Tangent",
+      "geometries": [
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "rocker arm-3"
+          ],
+          "instanceUid": "rocker arm-3",
+          "part": "rocker_arm",
+          "entityUid": "rocker arm*:*Default",
+          "position": [
+            0.004,
+            -0.008,
+            -0.04
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "valve subassemble-2",
+            "VALVE-1"
+          ],
+          "instanceUid": "VALVE-1",
+          "part": "valve_2",
+          "entityUid": "VALVE*:*Default",
+          "position": [
+            0.0,
+            0.0,
+            -0.0025
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Tangent6",
+      "type": "Tangent",
+      "geometries": [
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "rocker arm-5"
+          ],
+          "instanceUid": "rocker arm-5",
+          "part": "rocker_arm_2",
+          "entityUid": "rocker arm*:*Default",
+          "position": [
+            0.004,
+            -0.008,
+            -0.04
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "valve subassemble-1",
+            "VALVE-1"
+          ],
+          "instanceUid": "VALVE-1",
+          "part": "valve_2",
+          "entityUid": "VALVE*:*Default",
+          "position": [
+            0.0,
+            0.0,
+            -0.0025
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "GearMate1",
+      "type": "UnknownConstraint",
+      "geometries": [
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "driving gear-1"
+          ],
+          "instanceUid": "driving gear-1",
+          "part": "driving_gear",
+          "entityUid": "driving gear*:*Default",
+          "position": [
+            0.0,
+            0.0,
+            0.018
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ]
+        },
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "gear-1"
+          ],
+          "instanceUid": "gear-1",
+          "part": "gear",
+          "entityUid": "gear*:*Default",
+          "position": [
+            0.018,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Concentric23",
+      "type": "Concentric",
+      "geometries": [
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "camshaft-1"
+          ],
+          "instanceUid": "camshaft-1",
+          "part": "camshaft",
+          "entityUid": "camshaft*:*Default",
+          "position": [
+            0.125,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "geometry": "cylinder",
+          "instancePath": [
+            "propeller-1"
+          ],
+          "instanceUid": "propeller-1",
+          "part": "propeller",
+          "entityUid": "propeller*:*Default",
+          "position": [
+            0.0,
+            0.02009,
+            -0.214751
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Coincident27",
+      "type": "Coincident",
+      "geometries": [
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "camshaft-1"
+          ],
+          "instanceUid": "camshaft-1",
+          "part": "camshaft",
+          "entityUid": "camshaft*:*Default",
+          "position": [
+            -0.116,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "propeller-1"
+          ],
+          "instanceUid": "propeller-1",
+          "part": "propeller",
+          "entityUid": "propeller*:*Default",
+          "position": [
+            0.0,
+            0.03009,
+            -0.214751
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Coincident28",
+      "type": "Coincident",
+      "geometries": [
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "camshaft-1"
+          ],
+          "instanceUid": "camshaft-1",
+          "part": "camshaft",
+          "entityUid": "camshaft*:*Default",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "geometry": "plane",
+          "instancePath": [
+            "propeller-1"
+          ],
+          "instanceUid": "propeller-1",
+          "part": "propeller",
+          "entityUid": "propeller*:*Default",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    }
   ]
 }
