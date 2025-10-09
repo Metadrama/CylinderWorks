@@ -10,6 +10,8 @@ struct DiagnosticsSnapshot {
     int32_t surfaceWidth{0};
     int32_t surfaceHeight{0};
     int32_t frameCount{0};
+    int32_t partCount{0};
+    int32_t constraintCount{0};
     bool eglReady{false};
     char gpuRenderer[128] = {0};
     char gpuVendor[128] = {0};

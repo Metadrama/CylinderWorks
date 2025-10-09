@@ -247,6 +247,7 @@ void EngineRenderer::InitializeGlResourcesLocked() {
     partShader_.Destroy();
     gridPlane_.Destroy();
     assembly_.Destroy();
+    kinematics_ = KinematicsSystem();
     assemblyLoaded_ = false;
 
     if (!gridShader_.Compile(kGridVertexShaderSrc, kGridFragmentShaderSrc)) {
@@ -296,6 +297,7 @@ void EngineRenderer::DestroyGlResourcesLocked() {
         partShader_.Destroy();
         gridPlane_.Destroy();
         assembly_.Destroy();
+        kinematics_ = KinematicsSystem();
         assemblyLoaded_ = false;
         return;
     }
@@ -313,6 +315,7 @@ void EngineRenderer::DestroyGlResourcesLocked() {
     partShader_.Destroy();
     gridPlane_.Destroy();
     assembly_.Destroy();
+    kinematics_ = KinematicsSystem();
     assemblyLoaded_ = false;
 
     egl_.DetachCurrent();
@@ -346,7 +349,16 @@ void EngineRenderer::EnsureAssemblyInitializedLocked() {
         return;
     }
 
-    assembly_.ApplyTransforms(std::vector<PartTransform>{});
+    const auto anchors = assembly_.Anchors();
+    const bool kinematicsReady = kinematics_.Initialize(anchors, assembly_.Constraints());
+    if (kinematicsReady) {
+        assembly_.ApplyTransforms(kinematics_.BuildDefaultPose());
+    } else {
+        assembly_.ApplyTransforms(std::vector<PartTransform>{});
+    }
+    __android_log_print(ANDROID_LOG_INFO, kTag,
+                        "Assembly ready: %zu parts, %zu anchors, %zu constraints",
+                        assembly_.Parts().size(), anchors.size(), kinematics_.ConstraintCount());
     assemblyLoaded_ = true;
 }
 
@@ -491,6 +503,8 @@ void EngineRenderer::FillDiagnostics(DiagnosticsSnapshot* outSnapshot) const {
     std::scoped_lock lock(mutex_);
     outSnapshot->surfaceWidth = width_;
     outSnapshot->surfaceHeight = height_;
+    outSnapshot->partCount = static_cast<int32_t>(assembly_.Parts().size());
+    outSnapshot->constraintCount = static_cast<int32_t>(kinematics_.ConstraintCount());
     std::snprintf(outSnapshot->gpuRenderer, sizeof(outSnapshot->gpuRenderer), "%s", gpuRenderer_.data());
     std::snprintf(outSnapshot->gpuVendor, sizeof(outSnapshot->gpuVendor), "%s", gpuVendor_.data());
     std::snprintf(outSnapshot->gpuVersion, sizeof(outSnapshot->gpuVersion), "%s", gpuVersion_.data());

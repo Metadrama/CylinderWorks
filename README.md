@@ -29,5 +29,6 @@ flutter run -d android
 ## Next steps
 
 - Enrich the renderer with engine component meshes.
+- Wire the generated Simscape assembly export (parts + constraints) into the runtime kinematics layer.
 - Bridge structured telemetry (RPM, torque, cycle phase) from native physics once the solver is ready.
 - Expand the platform support matrix (desktop, iOS) using the same FFI façade.

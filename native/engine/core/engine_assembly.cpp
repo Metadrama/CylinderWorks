@@ -126,6 +126,8 @@ bool EngineAssembly::Load(AAssetManager* assetManager, const std::string& mappin
     const size_t slash = mappingAssetPath.find_last_of('/');
     const std::string basePath = (slash == std::string::npos) ? std::string{} : mappingAssetPath.substr(0, slash + 1);
 
+    constraints_.clear();
+
     for (size_t i = 0; i < partsValue.Size(); ++i) {
         const JsonValue& partJson = partsValue[i];
         if (!LoadPart(assetManager, basePath, partJson)) {
@@ -168,6 +170,74 @@ bool EngineAssembly::Load(AAssetManager* assetManager, const std::string& mappin
         }
     }
 
+    if (document.Contains("constraints")) {
+        const JsonValue& constraintsValue = document["constraints"];
+        if (constraintsValue.IsArray()) {
+            for (size_t i = 0; i < constraintsValue.Size(); ++i) {
+                const JsonValue& constraintJson = constraintsValue[i];
+                if (!constraintJson.IsObject()) {
+                    continue;
+                }
+
+                AssemblyConstraint constraint;
+                if (constraintJson.Contains("name")) {
+                    constraint.name = constraintJson["name"].AsString("");
+                }
+                if (constraintJson.Contains("type")) {
+                    constraint.type = constraintJson["type"].AsString("");
+                }
+
+                if (constraintJson.Contains("geometries")) {
+                    const JsonValue& geometries = constraintJson["geometries"];
+                    if (geometries.IsArray()) {
+                        for (size_t j = 0; j < geometries.Size(); ++j) {
+                            const JsonValue& geometryJson = geometries[j];
+                            if (!geometryJson.IsObject()) {
+                                continue;
+                            }
+
+                            ConstraintGeometry geometry;
+                            if (geometryJson.Contains("geometry")) {
+                                geometry.geometryType = geometryJson["geometry"].AsString("");
+                            }
+                            if (geometryJson.Contains("instancePath")) {
+                                const JsonValue& instancePathValue = geometryJson["instancePath"];
+                                if (instancePathValue.IsArray()) {
+                                    for (size_t k = 0; k < instancePathValue.Size(); ++k) {
+                                        const JsonValue& pathEntry = instancePathValue[k];
+                                        geometry.instancePath.push_back(pathEntry.AsString(""));
+                                    }
+                                }
+                            }
+                            if (geometryJson.Contains("instanceUid")) {
+                                geometry.instanceUid = geometryJson["instanceUid"].AsString("");
+                            }
+                            if (geometryJson.Contains("part")) {
+                                geometry.partName = geometryJson["part"].AsString("");
+                            }
+                            if (geometryJson.Contains("entityUid")) {
+                                geometry.entityUid = geometryJson["entityUid"].AsString("");
+                            }
+                            if (geometryJson.Contains("position")) {
+                                geometry.position = ParseVec3(geometryJson["position"], geometry.position);
+                            }
+                            if (geometryJson.Contains("axis")) {
+                                geometry.axis = ParseVec3(geometryJson["axis"], geometry.axis);
+                            }
+                            if (geometryJson.Contains("ground")) {
+                                geometry.ground = geometryJson["ground"].AsBool(false);
+                            }
+
+                            constraint.geometries.push_back(std::move(geometry));
+                        }
+                    }
+                }
+
+                constraints_.push_back(std::move(constraint));
+            }
+        }
+    }
+
     return !parts_.empty();
 }
 
@@ -177,6 +247,7 @@ void EngineAssembly::Destroy() {
     }
     parts_.clear();
     partLookup_.clear();
+    constraints_.clear();
 }
 
 std::vector<PartAnchor> EngineAssembly::Anchors() const {

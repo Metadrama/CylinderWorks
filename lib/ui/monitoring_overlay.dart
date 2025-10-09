@@ -14,6 +14,8 @@ class DiagnosticsSnapshot {
     this.surfaceWidth,
     this.surfaceHeight,
     this.frameCount,
+    this.partCount,
+    this.constraintCount,
     this.gpuRenderer,
     this.gpuVendor,
     this.gpuVersion,
@@ -30,6 +32,8 @@ class DiagnosticsSnapshot {
   final int? surfaceWidth;
   final int? surfaceHeight;
   final int? frameCount;
+  final int? partCount;
+  final int? constraintCount;
   final String? gpuRenderer;
   final String? gpuVendor;
   final String? gpuVersion;
@@ -76,6 +80,8 @@ class DiagnosticsSnapshot {
       surfaceWidth: other.surfaceWidth ?? surfaceWidth,
       surfaceHeight: other.surfaceHeight ?? surfaceHeight,
       frameCount: other.frameCount ?? frameCount,
+      partCount: other.partCount ?? partCount,
+      constraintCount: other.constraintCount ?? constraintCount,
       gpuRenderer: other.gpuRenderer ?? gpuRenderer,
       gpuVendor: other.gpuVendor ?? gpuVendor,
       gpuVersion: other.gpuVersion ?? gpuVersion,
@@ -120,6 +126,8 @@ class DiagnosticsSnapshot {
       surfaceWidth: _asInt(map['surfaceWidth']),
       surfaceHeight: _asInt(map['surfaceHeight']),
       frameCount: _asInt(map['frameCount']),
+      partCount: _asInt(map['partCount']),
+      constraintCount: _asInt(map['constraintCount']),
       gpuRenderer: _cast<String>(map['gpuRenderer']),
       gpuVendor: _cast<String>(map['gpuVendor']),
       gpuVersion: _cast<String>(map['gpuVersion']),
@@ -262,6 +270,13 @@ class _MonitoringOverlayState extends State<MonitoringOverlay> {
               if (_snapshot.frameCountLabel != null) ...[
                 const SizedBox(height: 8),
                 _InfoLine(label: 'Frames', value: _snapshot.frameCountLabel!),
+              ],
+              if (_snapshot.partCount != null || _snapshot.constraintCount != null) ...[
+                const SizedBox(height: 8),
+                if (_snapshot.partCount != null)
+                  _InfoLine(label: 'Parts', value: _snapshot.partCount!.toString()),
+                if (_snapshot.constraintCount != null)
+                  _InfoLine(label: 'Constraints', value: _snapshot.constraintCount!.toString()),
               ],
             ],
           ),

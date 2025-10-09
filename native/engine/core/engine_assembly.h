@@ -51,6 +51,7 @@ public:
 
     const std::vector<EnginePart>& Parts() const { return parts_; }
     std::vector<PartAnchor> Anchors() const;
+    const std::vector<AssemblyConstraint>& Constraints() const { return constraints_; }
     void ApplyTransforms(const std::vector<PartTransform>& transforms);
 
 private:
@@ -65,6 +66,7 @@ private:
 
     std::vector<EnginePart> parts_;
     std::unordered_map<std::string, size_t> partLookup_;
+    std::vector<AssemblyConstraint> constraints_;
 };
 
 }  // namespace engine
