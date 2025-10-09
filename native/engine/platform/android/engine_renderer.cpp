@@ -9,6 +9,7 @@
 #include <cstdio>
 #include <cstring>
 #include <thread>
+#include <vector>
 #include <EGL/egl.h>
 #include <GLES3/gl3.h>
 
@@ -196,12 +197,6 @@ void EngineRenderer::SetAssemblyMapping(const std::string& mappingPath) {
     assemblyLoaded_ = false;
 }
 
-void EngineRenderer::SetControlInputs(const EngineControlInputs& inputs) {
-    std::scoped_lock lock(mutex_);
-    controlInputs_ = inputs;
-    physics_.SetControlInputs(inputs);
-}
-
 size_t EngineRenderer::PartCount() const {
     std::scoped_lock lock(mutex_);
     return assembly_.Parts().size();
@@ -351,9 +346,7 @@ void EngineRenderer::EnsureAssemblyInitializedLocked() {
         return;
     }
 
-    physics_.SetAnchors(assembly_.Anchors());
-    physics_.SetControlInputs(controlInputs_);
-    assembly_.ApplyTransforms(physics_.Evaluate(0.0f));
+    assembly_.ApplyTransforms(std::vector<PartTransform>{});
     assemblyLoaded_ = true;
 }
 
@@ -399,17 +392,8 @@ void EngineRenderer::RenderFrame(int64_t frameTimeNanos) {
 
     gridPlane_.Draw();
 
-    float deltaSeconds = 0.0f;
-    const float frameTime = frameTimeMs_.load(std::memory_order_relaxed);
-    if (frameTime > 0.0f) {
-        deltaSeconds = frameTime / 1000.0f;
-    }
-
     EnsureAssemblyInitializedLocked();
     if (assemblyLoaded_) {
-        const auto& transforms = physics_.Evaluate(deltaSeconds);
-        assembly_.ApplyTransforms(transforms);
-
         glUseProgram(partShader_.Id());
         glUniformMatrix4fv(uPartViewProj_, 1, GL_FALSE, viewProj.Ptr());
         glUniform3f(uPartLightDir_, kLightDir[0], kLightDir[1], kLightDir[2]);

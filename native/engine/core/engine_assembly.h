@@ -6,11 +6,11 @@
 #include <unordered_map>
 #include <vector>
 
+#include "engine/core/assembly_types.h"
 #include "engine/core/gltf_loader.h"
 #include "engine/core/json_utils.h"
 #include "engine/core/math_types.h"
 #include "engine/core/mesh.h"
-#include "engine/core/physics_stub.h"
 
 namespace engine {
 

@@ -5,7 +5,6 @@ add_library(engine_core STATIC
     grid_plane.cpp
     json_utils.cpp
     mesh.cpp
-    physics_stub.cpp
     shader_program.cpp
 )
 

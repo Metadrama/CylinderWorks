@@ -43,7 +43,6 @@ class EngineRendererView(context: Context) : PlatformView, SurfaceHolder.Callbac
             if (!loaded) {
                 Log.w(TAG, "Failed to schedule assembly load for asset: $assetKey")
             }
-            NativeBridge.nativeSetControlInputs(rendererHandle, 0f, false, false)
         }
 
         surfaceView = object : SurfaceView(context) {

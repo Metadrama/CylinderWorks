@@ -210,19 +210,6 @@ Java_com_example_cylinderworks_engine_NativeBridge_nativeLoadAssembly(JNIEnv* en
 }
 
 JNIEXPORT void JNICALL
-Java_com_example_cylinderworks_engine_NativeBridge_nativeSetControlInputs(JNIEnv* env, jclass /*clazz*/, jlong handle, jfloat throttle, jboolean starter, jboolean ignition) {
-    auto* renderer = FromHandle(handle);
-    if (!renderer) {
-        return;
-    }
-    engine::EngineControlInputs inputs;
-    inputs.throttle = throttle;
-    inputs.starterEngaged = starter == JNI_TRUE;
-    inputs.ignitionEnabled = ignition == JNI_TRUE;
-    renderer->SetControlInputs(inputs);
-}
-
-JNIEXPORT void JNICALL
 Java_com_example_cylinderworks_engine_NativeBridge_nativeResize(JNIEnv* env, jclass /*clazz*/, jlong handle, jint width, jint height) {
     auto* renderer = FromHandle(handle);
     if (!renderer) {
@@ -367,18 +354,6 @@ void engine_renderer_stop(int64_t handle) {
         return;
     }
     renderer->Stop();
-}
-
-void engine_renderer_set_controls(int64_t handle, float throttle, int starter, int ignition) {
-    auto* renderer = FromPointer(handle);
-    if (!renderer) {
-        return;
-    }
-    engine::EngineControlInputs inputs;
-    inputs.throttle = throttle;
-    inputs.starterEngaged = starter != 0;
-    inputs.ignitionEnabled = ignition != 0;
-    renderer->SetControlInputs(inputs);
 }
 
 int32_t engine_renderer_part_count(int64_t handle) {

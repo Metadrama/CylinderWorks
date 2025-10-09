@@ -15,7 +15,6 @@
 #include "engine/core/engine_assembly.h"
 #include "engine/platform/android/egl_context.h"
 #include "engine/core/grid_plane.h"
-#include "engine/core/physics_stub.h"
 #include "engine/core/math_types.h"
 #include "engine/core/shader_program.h"
 
@@ -38,8 +37,6 @@ public:
     void SetPreferredFrameRate(int fps);
     void SetAssetManager(AAssetManager* assetManager);
     void SetAssemblyMapping(const std::string& mappingPath);
-    void SetControlInputs(const EngineControlInputs& inputs);
-
     size_t PartCount() const;
     bool CopyPartTransform(size_t index, Mat4* outMatrix, std::string* outName) const;
 
@@ -73,8 +70,6 @@ private:
     ShaderProgram partShader_{};
     GridPlane gridPlane_{};
     EngineAssembly assembly_{};
-    PhysicsSystemStub physics_{};
-    EngineControlInputs controlInputs_{};
 
     GLint uViewProj_{-1};
     GLint uModel_{-1};

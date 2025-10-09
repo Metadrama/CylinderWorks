@@ -21,8 +21,6 @@ typedef _StartNative = ffi.Void Function(ffi.Int64);
 typedef _StartDart = void Function(int);
 typedef _StopNative = ffi.Void Function(ffi.Int64);
 typedef _StopDart = void Function(int);
-typedef _SetControlsNative = ffi.Void Function(ffi.Int64, ffi.Float, ffi.Uint8, ffi.Uint8);
-typedef _SetControlsDart = void Function(int, double, int, int);
 typedef _PartCountNative = ffi.Int32 Function(ffi.Int64);
 typedef _PartCountDart = int Function(int);
 typedef _CopyPartNative = ffi.Int32 Function(
@@ -66,7 +64,6 @@ class EngineRendererBindings {
   _FpsDart? _setFps;
   _StartDart? _start;
   _StopDart? _stop;
-  _SetControlsDart? _setControls;
   _PartCountDart? _partCount;
   _CopyPartDart? _copyPart;
 
@@ -93,7 +90,6 @@ class EngineRendererBindings {
       _setFps = _library!.lookupFunction<_FpsNative, _FpsDart>('engine_renderer_set_preferred_fps');
       _start = _library!.lookupFunction<_StartNative, _StartDart>('engine_renderer_start');
       _stop = _library!.lookupFunction<_StopNative, _StopDart>('engine_renderer_stop');
-      _setControls = _library!.lookupFunction<_SetControlsNative, _SetControlsDart>('engine_renderer_set_controls');
       _partCount = _library!.lookupFunction<_PartCountNative, _PartCountDart>('engine_renderer_part_count');
       _copyPart = _library!.lookupFunction<_CopyPartNative, _CopyPartDart>('engine_renderer_copy_part_transform');
     } on Object {
@@ -137,10 +133,6 @@ class EngineRendererBindings {
 
   void stop(int handle) {
     _stop?.call(handle);
-  }
-
-  void setControlInputs(int handle, double throttle, bool starter, bool ignition) {
-    _setControls?.call(handle, throttle, starter ? 1 : 0, ignition ? 1 : 0);
   }
 
   int partCount(int handle) {
