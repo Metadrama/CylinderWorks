@@ -1,6 +1,7 @@
 add_library(engine_core STATIC
     camera.cpp
     engine_assembly.cpp
+    kinematics_system.cpp
     gltf_loader.cpp
     grid_plane.cpp
     json_utils.cpp

@@ -17,6 +17,7 @@
 #include "engine/core/grid_plane.h"
 #include "engine/core/math_types.h"
 #include "engine/core/shader_program.h"
+#include "engine/core/kinematics_system.h"
 
 namespace engine {
 
@@ -70,6 +71,7 @@ private:
     ShaderProgram partShader_{};
     GridPlane gridPlane_{};
     EngineAssembly assembly_{};
+    KinematicsSystem kinematics_{};
 
     GLint uViewProj_{-1};
     GLint uModel_{-1};

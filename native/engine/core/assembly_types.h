@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <vector>
+
 #include "engine/core/math_types.h"
 
 namespace engine {
@@ -17,6 +19,23 @@ struct PartAnchor {
 struct PartTransform {
     std::string name;
     Mat4 transform{Mat4::Identity()};
+};
+
+struct ConstraintGeometry {
+    std::string geometryType;
+    std::vector<std::string> instancePath;
+    std::string instanceUid;
+    std::string partName;
+    std::string entityUid;
+    Vec3 position{0.0f, 0.0f, 0.0f};
+    Vec3 axis{0.0f, 0.0f, 1.0f};
+    bool ground{false};
+};
+
+struct AssemblyConstraint {
+    std::string name;
+    std::string type;
+    std::vector<ConstraintGeometry> geometries;
 };
 
 }  // namespace engine

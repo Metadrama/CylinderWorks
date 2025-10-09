@@ -138,6 +138,8 @@ Java_com_example_cylinderworks_engine_NativeBridge_nativeGetDiagnostics(JNIEnv* 
     putInt("surfaceWidth", snapshot.surfaceWidth);
     putInt("surfaceHeight", snapshot.surfaceHeight);
     putInt("frameCount", snapshot.frameCount);
+    putInt("partCount", snapshot.partCount);
+    putInt("constraintCount", snapshot.constraintCount);
     putBool("eglReady", snapshot.eglReady ? JNI_TRUE : JNI_FALSE);
     putString("gpuRenderer", snapshot.gpuRenderer);
     putString("gpuVendor", snapshot.gpuVendor);
