@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../native/engine_renderer_bindings.dart';
+import '../theme/design_tokens.dart';
+import 'components/info_line.dart';
+import 'components/info_panel.dart';
+import 'components/metric_tile.dart';
 
 const _kDiagnosticsChannel = MethodChannel('engine/diagnostics');
 
@@ -205,150 +209,67 @@ class _MonitoringOverlayState extends State<MonitoringOverlay> {
     }
     final deviceLabel = deviceParts.isNotEmpty ? deviceParts.join(' ') : null;
 
-    return Card(
-      color: theme.colorScheme.surface.withOpacity(0.9),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      elevation: 6,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minWidth: 240, maxWidth: 320),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return InfoPanel(
+      title: 'Realtime Monitor',
+      icon: Icons.speed,
+      onClose: widget.onClose,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          InfoLine(label: 'Rendering', value: _snapshot.renderingLabel),
+          if (_snapshot.gpuVersion != null && _snapshot.gpuVersion!.isNotEmpty)
+            InfoLine(label: 'GL', value: _snapshot.gpuVersion!),
+          if (vendorLabel != null)
+            InfoLine(label: 'Vendor', value: vendorLabel),
+          if (deviceLabel != null)
+            InfoLine(label: 'Device', value: deviceLabel),
+          if (_hasChannel)
+            InfoLine(
+              label: 'Pipeline',
+              value: _snapshot.eglReady == true ? 'EGL · active' : 'EGL · standby',
+            )
+          else
+            const InfoLine(label: 'Pipeline', value: 'Channel unavailable'),
+          InfoLine(
+            label: 'FFI/Ffigen',
+            value: ffiEnabled ? 'enabled' : 'disabled',
+          ),
+          const SizedBox(height: DesignTokens.spaceSm),
+          Row(
             children: [
-              Row(
-                children: [
-                  const Icon(Icons.speed, size: 18),
-                  const SizedBox(width: 8),
-                  const Expanded(
-                    child: Text(
-                      'Realtime Monitor',
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                  IconButton(
-                    visualDensity: VisualDensity.compact,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    icon: const Icon(Icons.close, size: 16),
-                    onPressed: widget.onClose,
-                  ),
-                ],
+              Expanded(
+                child: MetricTile(
+                  title: 'FPS',
+                  value: _snapshot.fpsLabel,
+                  color: theme.colorScheme.secondary,
+                ),
               ),
-              const SizedBox(height: 8),
-              _InfoLine(label: 'Rendering', value: _snapshot.renderingLabel),
-              if (_snapshot.gpuVersion != null && _snapshot.gpuVersion!.isNotEmpty)
-                _InfoLine(label: 'GL', value: _snapshot.gpuVersion!),
-              if (vendorLabel != null)
-                _InfoLine(label: 'Vendor', value: vendorLabel),
-              if (deviceLabel != null)
-                _InfoLine(label: 'Device', value: deviceLabel),
-              if (_hasChannel)
-                _InfoLine(
-                  label: 'Pipeline',
-                  value: _snapshot.eglReady == true ? 'EGL · active' : 'EGL · standby',
-                )
-              else
-                const _InfoLine(label: 'Pipeline', value: 'Channel unavailable'),
-              _InfoLine(
-                label: 'FFI/Ffigen',
-                value: ffiEnabled ? 'enabled' : 'disabled',
+              const SizedBox(width: DesignTokens.spaceSm),
+              Expanded(
+                child: MetricTile(
+                  title: 'Frame',
+                  value: _snapshot.frameTimeLabel,
+                  color: theme.colorScheme.tertiary,
+                ),
               ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(child: _MetricTile(title: 'FPS', value: _snapshot.fpsLabel)),
-                  const SizedBox(width: 8),
-                  Expanded(child: _MetricTile(title: 'Frame', value: _snapshot.frameTimeLabel)),
-                ],
-              ),
-              if (surfaceLabel != null) ...[
-                const SizedBox(height: 8),
-                _InfoLine(label: 'Viewport', value: surfaceLabel),
-              ],
-              if (_snapshot.frameCountLabel != null) ...[
-                const SizedBox(height: 8),
-                _InfoLine(label: 'Frames', value: _snapshot.frameCountLabel!),
-              ],
-              if (_snapshot.partCount != null || _snapshot.constraintCount != null) ...[
-                const SizedBox(height: 8),
-                if (_snapshot.partCount != null)
-                  _InfoLine(label: 'Parts', value: _snapshot.partCount!.toString()),
-                if (_snapshot.constraintCount != null)
-                  _InfoLine(label: 'Constraints', value: _snapshot.constraintCount!.toString()),
-              ],
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _InfoLine extends StatelessWidget {
-  const _InfoLine({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final baseStyle = Theme.of(context).textTheme.bodySmall;
-    final labelColor = baseStyle?.color?.withOpacity(0.8);
-    final labelStyle = baseStyle?.copyWith(
-      fontWeight: FontWeight.w600,
-      color: labelColor,
-    );
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('$label:', style: labelStyle),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Text(
-              value,
-              style: baseStyle,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MetricTile extends StatelessWidget {
-  const _MetricTile({required this.title, required this.value});
-
-  final String title;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.primary.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            title,
-            style: theme.textTheme.labelSmall?.copyWith(fontSize: 11, color: theme.colorScheme.primary.withOpacity(0.7)),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-          ),
+          if (surfaceLabel != null) ...[
+            const SizedBox(height: DesignTokens.spaceSm),
+            InfoLine(label: 'Viewport', value: surfaceLabel),
+          ],
+          if (_snapshot.frameCountLabel != null) ...[
+            const SizedBox(height: DesignTokens.spaceSm),
+            InfoLine(label: 'Frames', value: _snapshot.frameCountLabel!),
+          ],
+          if (_snapshot.partCount != null || _snapshot.constraintCount != null) ...[
+            const SizedBox(height: DesignTokens.spaceSm),
+            if (_snapshot.partCount != null)
+              InfoLine(label: 'Parts', value: _snapshot.partCount!.toString()),
+            if (_snapshot.constraintCount != null)
+              InfoLine(label: 'Constraints', value: _snapshot.constraintCount!.toString()),
+          ],
         ],
       ),
     );

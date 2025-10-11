@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'native/engine_renderer_bindings.dart';
 import 'native/engine_renderer_view.dart';
+import 'theme/app_theme.dart';
+import 'theme/design_tokens.dart';
 import 'ui/monitoring_overlay.dart';
 
 void main() {
@@ -16,9 +18,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: const Color(0xFF08090D),
-      ),
+      theme: AppTheme.darkTheme,
       home: const EngineRendererScreen(),
     );
   }
@@ -43,29 +43,31 @@ class _EngineRendererScreenState extends State<EngineRendererScreen> {
             child: EngineRendererView(),
           ),
           Positioned(
-            left: 16,
-            top: 48,
+            left: DesignTokens.spaceMd,
+            top: DesignTokens.spaceXxl,
             child: SizedBox(
               width: 280,
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: Colors.black.withOpacity(0.35),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
                 ),
-                child: const Padding(
-                  padding: EdgeInsets.all(12),
+                child: Padding(
+                  padding: const EdgeInsets.all(DesignTokens.spaceSm + DesignTokens.spaceXs),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         'CylinderWorks Renderer Prototype',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                      SizedBox(height: 8),
-                      Text('• One finger drag: orbit camera'),
-                      Text('• Two finger drag: pan target'),
-                      Text('• Pinch: zoom'),
+                      const SizedBox(height: DesignTokens.spaceSm),
+                      const Text('• One finger drag: orbit camera'),
+                      const Text('• Two finger drag: pan target'),
+                      const Text('• Pinch: zoom'),
                     ],
                   ),
                 ),
@@ -74,16 +76,16 @@ class _EngineRendererScreenState extends State<EngineRendererScreen> {
           ),
           if (_showDiagnostics)
             Positioned(
-              top: 48,
-              right: 16,
+              top: DesignTokens.spaceXxl,
+              right: DesignTokens.spaceMd,
               child: MonitoringOverlay(
                 onClose: () => setState(() => _showDiagnostics = false),
               ),
             ),
           if (!_showDiagnostics)
             Positioned(
-              bottom: 32,
-              right: 24,
+              bottom: DesignTokens.spaceXl,
+              right: DesignTokens.spaceLg,
               child: FloatingActionButton.small(
                 heroTag: 'monitoring-toggle',
                 backgroundColor: Colors.black.withOpacity(0.65),
