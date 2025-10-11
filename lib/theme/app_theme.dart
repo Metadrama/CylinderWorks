@@ -49,7 +49,7 @@ class AppTheme {
       textTheme: _buildTextTheme(),
       
       // Card theme
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.surface,
         elevation: DesignTokens.elevationMedium,
         shape: RoundedRectangleBorder(
@@ -148,7 +148,7 @@ class AppTheme {
       ),
       
       // Dialog theme
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: AppColors.surface,
         elevation: DesignTokens.elevationHigh,
         shape: RoundedRectangleBorder(
