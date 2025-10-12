@@ -20,5 +20,6 @@ object NativeBridge {
     external fun nativePan(handle: Long, dx: Float, dy: Float)
     external fun nativeZoom(handle: Long, delta: Float)
     external fun nativeSetPreferredFps(handle: Long, fps: Int)
+    external fun nativeSetTestRpm(handle: Long, rpm: Float)
     external fun nativeGetDiagnostics(handle: Long): Map<String, Any?>?
 }

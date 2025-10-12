@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'native/engine_renderer_bindings.dart';
 import 'native/engine_renderer_view.dart';
 import 'ui/monitoring_overlay.dart';
+import 'ui/rpm_test_panel.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,9 +40,7 @@ class _EngineRendererScreenState extends State<EngineRendererScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          const Positioned.fill(
-            child: EngineRendererView(),
-          ),
+          const Positioned.fill(child: EngineRendererView()),
           Positioned(
             left: 16,
             top: 48,
@@ -60,7 +59,10 @@ class _EngineRendererScreenState extends State<EngineRendererScreen> {
                     children: [
                       Text(
                         'CylinderWorks Renderer Prototype',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       SizedBox(height: 8),
                       Text('• One finger drag: orbit camera'),
@@ -91,6 +93,7 @@ class _EngineRendererScreenState extends State<EngineRendererScreen> {
                 child: const Icon(Icons.monitor_heart_outlined),
               ),
             ),
+          const Positioned(left: 16, bottom: 28, child: RpmTestPanel()),
         ],
       ),
     );

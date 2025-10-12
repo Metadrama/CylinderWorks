@@ -18,7 +18,8 @@ private enum class InteractionMode {
     PAN
 }
 
-class EngineRendererView(context: Context) : PlatformView, SurfaceHolder.Callback, EngineDiagnosticsRegistry.Provider {
+class EngineRendererView(context: Context) : PlatformView, SurfaceHolder.Callback,
+    EngineDiagnosticsRegistry.Provider, EngineControlRegistry.Controller {
 
     companion object {
         private const val TAG = "EngineRendererView"
@@ -33,8 +34,9 @@ class EngineRendererView(context: Context) : PlatformView, SurfaceHolder.Callbac
     private var rendererHandle: Long = 0
 
     init {
-        rendererHandle = NativeBridge.nativeCreateRenderer()
+    rendererHandle = NativeBridge.nativeCreateRenderer()
         EngineDiagnosticsRegistry.register(this)
+    EngineControlRegistry.register(this)
 
         if (rendererHandle != 0L) {
             NativeBridge.nativeSetAssetManager(rendererHandle, context.assets)
@@ -79,6 +81,8 @@ class EngineRendererView(context: Context) : PlatformView, SurfaceHolder.Callbac
         NativeBridge.nativeStop(rendererHandle)
         NativeBridge.nativeClearSurface(rendererHandle)
         EngineDiagnosticsRegistry.unregister(this)
+        EngineControlRegistry.unregister(this)
+        NativeBridge.nativeSetTestRpm(rendererHandle, 0f)
         NativeBridge.nativeDestroyRenderer(rendererHandle)
         rendererHandle = 0
     }
@@ -108,6 +112,11 @@ class EngineRendererView(context: Context) : PlatformView, SurfaceHolder.Callbac
     override fun diagnostics(): Map<String, Any?>? {
         if (rendererHandle == 0L) return null
         return NativeBridge.nativeGetDiagnostics(rendererHandle)?.toMutableMap()
+    }
+
+    override fun setTestRpm(rpm: Float) {
+        if (rendererHandle == 0L) return
+        NativeBridge.nativeSetTestRpm(rendererHandle, rpm)
     }
 
     private fun handleTouch(event: MotionEvent) {

@@ -275,6 +275,15 @@ Java_com_example_cylinderworks_engine_NativeBridge_nativeSetPreferredFps(JNIEnv*
 }
 
 JNIEXPORT void JNICALL
+Java_com_example_cylinderworks_engine_NativeBridge_nativeSetTestRpm(JNIEnv* env, jclass /*clazz*/, jlong handle, jfloat rpm) {
+    auto* renderer = FromHandle(handle);
+    if (!renderer) {
+        return;
+    }
+    renderer->SetTestRpm(rpm);
+}
+
+JNIEXPORT void JNICALL
 Java_com_example_cylinderworks_engine_NativeBridge_nativeClearSurface(JNIEnv* env, jclass /*clazz*/, jlong handle) {
     auto* renderer = FromHandle(handle);
     if (!renderer) {
@@ -340,6 +349,14 @@ void engine_renderer_set_preferred_fps(int64_t handle, int fps) {
         return;
     }
     renderer->SetPreferredFrameRate(fps);
+}
+
+void engine_renderer_set_test_rpm(int64_t handle, float rpm) {
+    auto* renderer = FromPointer(handle);
+    if (!renderer) {
+        return;
+    }
+    renderer->SetTestRpm(rpm);
 }
 
 void engine_renderer_start(int64_t handle) {

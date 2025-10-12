@@ -4,6 +4,8 @@
 #include <array>
 #include <mutex>
 #include <thread>
+#include <unordered_map>
+#include <vector>
 
 #include <android/asset_manager.h>
 #include <android/native_window.h>
@@ -38,6 +40,7 @@ public:
     void SetPreferredFrameRate(int fps);
     void SetAssetManager(AAssetManager* assetManager);
     void SetAssemblyMapping(const std::string& mappingPath);
+    void SetTestRpm(float rpm);
     size_t PartCount() const;
     bool CopyPartTransform(size_t index, Mat4* outMatrix, std::string* outName) const;
 
@@ -51,6 +54,9 @@ private:
     void DestroyGlResourcesLocked();
     void ClearSurfaceLocked();
     void EnsureAssemblyInitializedLocked();
+    void InitializeTestPoseLocked();
+    void StepTestKinematicsLocked(float deltaSeconds);
+    void ResetTestPoseLocked();
 
     void RenderFrame(int64_t frameTimeNanos);
     static void FrameCallback(long frameTimeNanos, void* data);
@@ -102,6 +108,12 @@ private:
     AAssetManager* assetManager_{nullptr};
     std::string assemblyMappingPath_{};
     bool assemblyLoaded_{false};
+
+    std::atomic<float> testRpm_{0.0f};
+    float testAngle_{0.0f};
+    std::vector<PartTransform> defaultPose_;
+    std::vector<PartTransform> workingPose_;
+    std::unordered_map<std::string, size_t> partIndices_;
 };
 
 }  // namespace engine

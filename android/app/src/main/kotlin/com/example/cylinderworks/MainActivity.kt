@@ -1,6 +1,7 @@
 package com.example.cylinderworks
 
 import android.os.Build
+import com.example.cylinderworks.engine.EngineControlRegistry
 import com.example.cylinderworks.engine.EngineDiagnosticsRegistry
 import com.example.cylinderworks.engine.EngineRendererViewFactory
 import io.flutter.embedding.android.FlutterActivity
@@ -29,6 +30,18 @@ class MainActivity : FlutterActivity() {
 							enriched["socManufacturer"] = Build.SOC_MANUFACTURER ?: ""
 						}
 						result.success(enriched)
+					}
+					else -> result.notImplemented()
+				}
+			}
+
+		MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "engine/control")
+			.setMethodCallHandler { call, result ->
+				when (call.method) {
+					"setTestRpm" -> {
+						val rpm = (call.argument<Number>("rpm")?.toFloat()) ?: 0f
+						EngineControlRegistry.setTestRpm(rpm)
+						result.success(null)
 					}
 					else -> result.notImplemented()
 				}

@@ -21,6 +21,8 @@ constexpr float kMajorStep = 1.0f;
 constexpr float kMinorStep = 0.1f;
 constexpr float kPlaneExtent = 200.0f;
 constexpr float kLightDir[3] = {-0.35f, 1.0f, 0.45f};
+constexpr float kTwoPi = 6.28318530717958647693f;
+constexpr float kRadToDeg = 57.29577951308232f;
 
 void CopyGlString(const GLubyte* source, std::array<char, 128>& destination) {
     if (!source) {
@@ -197,6 +199,11 @@ void EngineRenderer::SetAssemblyMapping(const std::string& mappingPath) {
     assemblyLoaded_ = false;
 }
 
+void EngineRenderer::SetTestRpm(float rpm) {
+    const float clamped = rpm < 0.0f ? 0.0f : rpm;
+    testRpm_.store(clamped, std::memory_order_relaxed);
+}
+
 size_t EngineRenderer::PartCount() const {
     std::scoped_lock lock(mutex_);
     return assembly_.Parts().size();
@@ -360,6 +367,124 @@ void EngineRenderer::EnsureAssemblyInitializedLocked() {
                         "Assembly ready: %zu parts, %zu anchors, %zu constraints",
                         assembly_.Parts().size(), anchors.size(), kinematics_.ConstraintCount());
     assemblyLoaded_ = true;
+    InitializeTestPoseLocked();
+}
+
+void EngineRenderer::InitializeTestPoseLocked() {
+    const auto& parts = assembly_.Parts();
+    partIndices_.clear();
+    partIndices_.reserve(parts.size());
+    for (size_t i = 0; i < parts.size(); ++i) {
+        partIndices_[parts[i].name] = i;
+    }
+
+    defaultPose_ = kinematics_.BuildDefaultPose();
+    if (defaultPose_.size() != parts.size()) {
+        defaultPose_.clear();
+        defaultPose_.reserve(parts.size());
+        for (const auto& part : parts) {
+            PartTransform transform;
+            transform.name = part.name;
+            transform.transform = part.currentTransform;
+            defaultPose_.push_back(transform);
+        }
+    }
+    workingPose_ = defaultPose_;
+    testAngle_ = 0.0f;
+}
+
+void EngineRenderer::ResetTestPoseLocked() {
+    if (defaultPose_.empty()) {
+        return;
+    }
+    workingPose_ = defaultPose_;
+    testAngle_ = 0.0f;
+    assembly_.ApplyTransforms(defaultPose_);
+}
+
+void EngineRenderer::StepTestKinematicsLocked(float deltaSeconds) {
+    if (!assemblyLoaded_ || defaultPose_.empty()) {
+        return;
+    }
+
+    const float rpm = testRpm_.load(std::memory_order_relaxed);
+    if (rpm <= 0.0f) {
+        ResetTestPoseLocked();
+        return;
+    }
+
+    if (deltaSeconds <= 0.0f) {
+        return;
+    }
+
+    workingPose_ = defaultPose_;
+
+    const float deltaAngle = kTwoPi * rpm * (deltaSeconds / 60.0f);
+    testAngle_ = std::fmod(testAngle_ + deltaAngle, kTwoPi);
+    if (testAngle_ < 0.0f) {
+        testAngle_ += kTwoPi;
+    }
+
+    const float angleDegrees = testAngle_ * kRadToDeg;
+
+    auto applyRotation = [&](const char* name, const Vec3& rotationDeg) {
+        auto it = partIndices_.find(name);
+        if (it == partIndices_.end()) {
+            return;
+        }
+        const size_t index = it->second;
+        if (index >= workingPose_.size()) {
+            return;
+        }
+        const Mat4& base = defaultPose_[index].transform;
+        const Mat4 rotation = ComposeTransform(Vec3{0.0f, 0.0f, 0.0f}, rotationDeg);
+        workingPose_[index].transform = Multiply(base, rotation);
+    };
+
+    auto applyTranslationY = [&](const char* name, float offsetY) {
+        auto it = partIndices_.find(name);
+        if (it == partIndices_.end()) {
+            return;
+        }
+        const size_t index = it->second;
+        if (index >= workingPose_.size()) {
+            return;
+        }
+        const Mat4& base = defaultPose_[index].transform;
+        const Mat4 translation = ComposeTransform(Vec3{0.0f, offsetY, 0.0f}, Vec3{0.0f, 0.0f, 0.0f});
+        workingPose_[index].transform = Multiply(base, translation);
+    };
+
+    // Basic rotational playback for rotating parts.
+    applyRotation("crankshaft", Vec3{angleDegrees, 0.0f, 0.0f});
+    applyRotation("shaft", Vec3{angleDegrees, 0.0f, 0.0f});
+    applyRotation("propeller", Vec3{angleDegrees, 0.0f, 0.0f});
+    applyRotation("driving_gear", Vec3{0.0f, angleDegrees, 0.0f});
+    applyRotation("gear", Vec3{0.0f, -angleDegrees, 0.0f});
+    applyRotation("camshaft", Vec3{angleDegrees * 0.5f, 0.0f, 0.0f});
+
+    // Simple slider-crank approximation for piston motion.
+    constexpr float kCrankRadius = 0.0275f;  // meters (approx)
+    constexpr float kRodLength = 0.085f;
+    const float sinTheta = std::sin(testAngle_);
+    const float cosTheta = std::cos(testAngle_);
+    const float underSqrt = std::max(kRodLength * kRodLength - (kCrankRadius * kCrankRadius * sinTheta * sinTheta), 0.0f);
+    const float sliderPos = kCrankRadius * cosTheta + std::sqrt(underSqrt);
+    const float reference = kRodLength + kCrankRadius;
+    const float pistonOffset = sliderPos - reference;
+    applyTranslationY("piston", pistonOffset);
+
+    // Rough connecting rod tilt coupled with piston offset.
+    auto rodIt = partIndices_.find("connecting_rod");
+    if (rodIt != partIndices_.end() && rodIt->second < workingPose_.size()) {
+        const float sinTilt = Clamp((kCrankRadius * sinTheta) / kRodLength, -1.0f, 1.0f);
+        const float tiltDegrees = std::asin(sinTilt) * kRadToDeg;
+        const Mat4& base = defaultPose_[rodIt->second].transform;
+        const Mat4 tilt = ComposeTransform(Vec3{0.0f, pistonOffset * 0.5f, 0.0f}, Vec3{0.0f, 0.0f, tiltDegrees});
+        workingPose_[rodIt->second].transform = Multiply(base, tilt);
+    }
+
+    assembly_.ApplyTransforms(workingPose_);
 }
 
 void EngineRenderer::RenderFrame(int64_t frameTimeNanos) {
@@ -375,11 +500,15 @@ void EngineRenderer::RenderFrame(int64_t frameTimeNanos) {
     }
 
     const int64_t previousTime = lastFrameTime_.exchange(frameTimeNanos, std::memory_order_relaxed);
+    float deltaSeconds = 0.0f;
     if (previousTime > 0) {
         const float deltaMs = static_cast<float>(frameTimeNanos - previousTime) / 1'000'000.0f;
         frameTimeMs_.store(deltaMs, std::memory_order_relaxed);
         if (deltaMs > 0.0f) {
             fps_.store(1000.0f / deltaMs, std::memory_order_relaxed);
+        }
+        if (deltaMs > 0.0f) {
+            deltaSeconds = deltaMs * 0.001f;
         }
     }
     frameCounter_.fetch_add(1, std::memory_order_relaxed);
@@ -406,6 +535,7 @@ void EngineRenderer::RenderFrame(int64_t frameTimeNanos) {
 
     EnsureAssemblyInitializedLocked();
     if (assemblyLoaded_) {
+        StepTestKinematicsLocked(deltaSeconds);
         glUseProgram(partShader_.Id());
         glUniformMatrix4fv(uPartViewProj_, 1, GL_FALSE, viewProj.Ptr());
         glUniform3f(uPartLightDir_, kLightDir[0], kLightDir[1], kLightDir[2]);

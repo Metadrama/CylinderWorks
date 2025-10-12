@@ -23,6 +23,8 @@ typedef _StopNative = ffi.Void Function(ffi.Int64);
 typedef _StopDart = void Function(int);
 typedef _PartCountNative = ffi.Int32 Function(ffi.Int64);
 typedef _PartCountDart = int Function(int);
+typedef _SetTestRpmNative = ffi.Void Function(ffi.Int64, ffi.Float);
+typedef _SetTestRpmDart = void Function(int, double);
 typedef _CopyPartNative = ffi.Int32 Function(
   ffi.Int64,
   ffi.Int32,
@@ -65,6 +67,7 @@ class EngineRendererBindings {
   _StartDart? _start;
   _StopDart? _stop;
   _PartCountDart? _partCount;
+  _SetTestRpmDart? _setTestRpm;
   _CopyPartDart? _copyPart;
 
   bool get isLoaded => _library != null;
@@ -91,6 +94,7 @@ class EngineRendererBindings {
       _start = _library!.lookupFunction<_StartNative, _StartDart>('engine_renderer_start');
       _stop = _library!.lookupFunction<_StopNative, _StopDart>('engine_renderer_stop');
       _partCount = _library!.lookupFunction<_PartCountNative, _PartCountDart>('engine_renderer_part_count');
+  _setTestRpm = _library!.lookupFunction<_SetTestRpmNative, _SetTestRpmDart>('engine_renderer_set_test_rpm');
       _copyPart = _library!.lookupFunction<_CopyPartNative, _CopyPartDart>('engine_renderer_copy_part_transform');
     } on Object {
       // FFI is optional on platforms where we cannot load a native library yet.
@@ -137,6 +141,10 @@ class EngineRendererBindings {
 
   int partCount(int handle) {
     return _partCount?.call(handle) ?? 0;
+  }
+
+  void setTestRpm(int handle, double rpm) {
+    _setTestRpm?.call(handle, rpm);
   }
 
   PartPose? partPose(int handle, int index) {
