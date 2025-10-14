@@ -61,6 +61,42 @@ private:
         Vec3 rodAxisDefault{0.0f, 1.0f, 0.0f};
     };
 
+    struct LinearSlider {
+        bool valid{false};
+        size_t anchorIndex{static_cast<size_t>(-1)};
+        Mat4 defaultTransform{Mat4::Identity()};
+        Vec3 axis{0.0f, 1.0f, 0.0f};
+        Vec3 localPoint{0.0f, 0.0f, 0.0f};
+        Vec3 basePoint{0.0f, 0.0f, 0.0f};
+    };
+
+    struct ValvetrainSet {
+        bool valid{false};
+        size_t pushrodIndex{static_cast<size_t>(-1)};
+        size_t rockerIndex{static_cast<size_t>(-1)};
+        size_t valveIndex{static_cast<size_t>(-1)};
+
+        LinearSlider pushrodSlider;
+        LinearSlider valveSlider;
+
+        Mat4 rockerDefault{Mat4::Identity()};
+        Vec3 pivotPoint{0.0f, 0.0f, 0.0f};
+        Vec3 pivotAxis{1.0f, 0.0f, 0.0f};
+        Vec3 rockerPushrodLocal{0.0f, 0.0f, 0.0f};
+        Vec3 rockerValveLocal{0.0f, 0.0f, 0.0f};
+        Vec3 pushrodContactLocal{0.0f, 0.0f, 0.0f};
+        Vec3 valveContactLocal{0.0f, 0.0f, 0.0f};
+        float camPhase{0.0f};
+        float pushrodAmplitude{0.0f};
+        float pushrodDirection{1.0f};
+    };
+
+    struct RelativeFollower {
+        size_t sourceIndex{static_cast<size_t>(-1)};
+        size_t followerIndex{static_cast<size_t>(-1)};
+        Mat4 relative{Mat4::Identity()};
+    };
+
     struct ValidationPair {
         size_t partA{static_cast<size_t>(-1)};
         size_t partB{static_cast<size_t>(-1)};
@@ -73,9 +109,15 @@ private:
     void BuildDefaultPoseCache();
     void BuildSliderCrankData();
     void BuildRotatingParts();
+    void BuildValvetrainData();
+    void BuildFollowers();
     void BuildValidationPairs();
     void ApplySliderCrank(float crankRadians, std::vector<PartTransform>& transforms);
     void ApplyRotatingParts(float crankRadians, std::vector<PartTransform>& transforms) const;
+    void ApplyValvetrain(float crankRadians, std::vector<PartTransform>& transforms);
+    void ApplyFollowers(std::vector<PartTransform>& transforms) const;
+    void ApplySliderDisplacement(const LinearSlider& slider, float displacement,
+                                 std::vector<PartTransform>& transforms) const;
     void ValidateKeyPairs(const std::vector<PartTransform>& transforms) const;
 
     const PartTransform* FindPartTransform(const std::vector<PartTransform>& transforms,
@@ -88,6 +130,9 @@ private:
     std::vector<PartTransform> defaultPose_;
     std::vector<RotatingPart> rotatingParts_;
     SliderCrankData sliderCrank_;
+    ValvetrainSet intakeTrain_;
+    ValvetrainSet exhaustTrain_;
+    std::vector<RelativeFollower> followers_;
     std::vector<ValidationPair> validationPairs_;
     float lastSliderDisplacement_{0.0f};
 };

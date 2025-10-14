@@ -14,6 +14,8 @@ namespace engine {
 namespace {
 
 constexpr const char* kTag = "EngineRenderer";
+constexpr float kPi = 3.14159265358979323846f;
+constexpr float kTwoPi = 6.28318530717958647693f;
 
 inline Vec3 TransformPoint(const Mat4& transform, const Vec3& point) {
     return Vec3{
@@ -100,6 +102,8 @@ bool KinematicsSystem::Initialize(const std::vector<PartAnchor>& anchors,
     BuildDefaultPoseCache();
     BuildSliderCrankData();
     BuildRotatingParts();
+    BuildValvetrainData();
+    BuildFollowers();
     BuildValidationPairs();
 
     return !anchors_.empty() || !constraints_.empty();
@@ -117,6 +121,8 @@ std::vector<PartTransform> KinematicsSystem::SolveForAngle(float crankRadians) {
 
     ApplySliderCrank(crankRadians, transforms);
     ApplyRotatingParts(crankRadians, transforms);
+    ApplyValvetrain(crankRadians, transforms);
+    ApplyFollowers(transforms);
     ValidateKeyPairs(transforms);
     return transforms;
 }
@@ -281,8 +287,7 @@ void KinematicsSystem::BuildRotatingParts() {
     rotatingParts_.clear();
 
     const std::unordered_map<std::string, float> kRatios{
-        {"shaft", 1.0f},
-        {"propeller", 1.0f},
+        {"propeller", 0.5f},
         {"driving_gear", 1.0f},
         {"gear", -1.0f},
         {"camshaft", 0.5f},
@@ -290,25 +295,25 @@ void KinematicsSystem::BuildRotatingParts() {
 
     auto findAxisForPart = [&](const std::string& name, Vec3* origin, Vec3* axis) -> bool {
         ConstraintGeometry partGeom;
-        ConstraintGeometry groundGeom;
+        bool found = false;
         for (const auto& constraint : constraints_) {
             if (constraint.type != "Concentric") {
                 continue;
             }
-            const ConstraintGeometry* localPart = nullptr;
-            const ConstraintGeometry* localGround = nullptr;
             for (const auto& geometry : constraint.geometries) {
                 if (geometry.partName == name) {
-                    localPart = &geometry;
-                } else if (geometry.ground) {
-                    localGround = &geometry;
+                    partGeom = geometry;
+                    found = true;
+                    break;
                 }
             }
-            if (localPart && localGround) {
-                partGeom = *localPart;
-                groundGeom = *localGround;
+            if (found) {
                 break;
             }
+        }
+
+        if (!found) {
+            return false;
         }
 
         auto it = anchorLookup_.find(name);
@@ -322,7 +327,7 @@ void KinematicsSystem::BuildRotatingParts() {
         if (Length(*axis) <= std::numeric_limits<float>::epsilon()) {
             *axis = Vec3{1.0f, 0.0f, 0.0f};
         }
-        return partGeom.partName == name;
+        return true;
     };
 
     for (const auto& entry : kRatios) {
@@ -346,6 +351,235 @@ void KinematicsSystem::BuildRotatingParts() {
         part.axisOrigin = origin;
         part.axisDirection = axis;
         rotatingParts_.push_back(part);
+    }
+}
+
+void KinematicsSystem::BuildValvetrainData() {
+    intakeTrain_ = ValvetrainSet{};
+    exhaustTrain_ = ValvetrainSet{};
+
+    auto findIndex = [&](const std::string& name) -> size_t {
+        auto it = anchorLookup_.find(name);
+        if (it == anchorLookup_.end()) {
+            return static_cast<size_t>(-1);
+        }
+        return it->second;
+    };
+
+    auto findConcentricWithGround = [&](const std::string& part, ConstraintGeometry* partGeom,
+                                        ConstraintGeometry* groundGeom) -> bool {
+        for (const auto& constraint : constraints_) {
+            if (constraint.type != "Concentric") {
+                continue;
+            }
+            const ConstraintGeometry* localPart = nullptr;
+            const ConstraintGeometry* localGround = nullptr;
+            for (const auto& geometry : constraint.geometries) {
+                if (geometry.partName == part) {
+                    localPart = &geometry;
+                } else if (geometry.ground) {
+                    localGround = &geometry;
+                }
+            }
+            if (localPart && localGround) {
+                if (partGeom) {
+                    *partGeom = *localPart;
+                }
+                if (groundGeom) {
+                    *groundGeom = *localGround;
+                }
+                return true;
+            }
+        }
+        return false;
+    };
+
+    auto findConstraintBetween = [&](const std::string& type, const std::string& partA,
+                                     const std::string& partB, ConstraintGeometry* geomA,
+                                     ConstraintGeometry* geomB) -> bool {
+        for (const auto& constraint : constraints_) {
+            if (constraint.type != type) {
+                continue;
+            }
+            const ConstraintGeometry* localA = nullptr;
+            const ConstraintGeometry* localB = nullptr;
+            for (const auto& geometry : constraint.geometries) {
+                if (geometry.partName == partA) {
+                    localA = &geometry;
+                } else if (geometry.partName == partB) {
+                    localB = &geometry;
+                }
+            }
+            if (localA && localB) {
+                if (geomA) {
+                    *geomA = *localA;
+                }
+                if (geomB) {
+                    *geomB = *localB;
+                }
+                return true;
+            }
+        }
+        return false;
+    };
+
+    auto buildTrain = [&](ValvetrainSet* train, const std::string& pushrodName,
+                          const std::string& rockerName, const std::string& valveName,
+                          float phase) {
+        if (!train) {
+            return;
+        }
+
+        const size_t pushrodIndex = findIndex(pushrodName);
+        const size_t rockerIndex = findIndex(rockerName);
+        const size_t valveIndex = findIndex(valveName);
+        if (!HasValue(pushrodIndex) || !HasValue(rockerIndex) || !HasValue(valveIndex)) {
+            return;
+        }
+
+        train->pushrodIndex = pushrodIndex;
+        train->rockerIndex = rockerIndex;
+        train->valveIndex = valveIndex;
+        train->camPhase = phase;
+
+        train->pushrodSlider.anchorIndex = pushrodIndex;
+        train->pushrodSlider.defaultTransform = anchors_[pushrodIndex].defaultTransform;
+        train->valveSlider.anchorIndex = valveIndex;
+        train->valveSlider.defaultTransform = anchors_[valveIndex].defaultTransform;
+        train->rockerDefault = anchors_[rockerIndex].defaultTransform;
+
+        ConstraintGeometry pushrodGeom;
+        if (!findConcentricWithGround(pushrodName, &pushrodGeom, nullptr)) {
+            return;
+        }
+
+        ConstraintGeometry valveGeom;
+        if (!findConcentricWithGround(valveName, &valveGeom, nullptr)) {
+            return;
+        }
+
+        ConstraintGeometry rockerPivot;
+        if (!findConstraintBetween("Concentric", rockerName, "shaft", &rockerPivot, nullptr)) {
+            return;
+        }
+
+        ConstraintGeometry pushrodContact;
+        ConstraintGeometry rockerPushrodContact;
+        if (!findConstraintBetween("Tangent", pushrodName, rockerName,
+                                   &pushrodContact, &rockerPushrodContact)) {
+            return;
+        }
+
+        ConstraintGeometry rockerValveContact;
+        ConstraintGeometry valveContact;
+        if (!findConstraintBetween("Tangent", rockerName, valveName,
+                                   &rockerValveContact, &valveContact)) {
+            return;
+        }
+
+        train->pushrodSlider.localPoint = pushrodGeom.position;
+        train->pushrodSlider.basePoint =
+            TransformPoint(train->pushrodSlider.defaultTransform, pushrodGeom.position);
+        train->pushrodSlider.axis = Normalize(
+            TransformDirection(train->pushrodSlider.defaultTransform, pushrodGeom.axis));
+        if (Length(train->pushrodSlider.axis) <= std::numeric_limits<float>::epsilon()) {
+            train->pushrodSlider.axis = Vec3{0.0f, 1.0f, 0.0f};
+        }
+        train->pushrodSlider.valid = true;
+
+        train->valveSlider.localPoint = valveGeom.position;
+        train->valveSlider.basePoint =
+            TransformPoint(train->valveSlider.defaultTransform, valveGeom.position);
+        train->valveSlider.axis = Normalize(
+            TransformDirection(train->valveSlider.defaultTransform, valveGeom.axis));
+        if (Length(train->valveSlider.axis) <= std::numeric_limits<float>::epsilon()) {
+            train->valveSlider.axis = Vec3{0.0f, 1.0f, 0.0f};
+        }
+        train->valveSlider.valid = true;
+
+        train->pivotPoint = TransformPoint(train->rockerDefault, rockerPivot.position);
+        train->pivotAxis = Normalize(
+            TransformDirection(train->rockerDefault, rockerPivot.axis));
+        if (Length(train->pivotAxis) <= std::numeric_limits<float>::epsilon()) {
+            train->pivotAxis = Vec3{1.0f, 0.0f, 0.0f};
+        }
+
+        train->rockerPushrodLocal = rockerPushrodContact.position;
+        train->rockerValveLocal = rockerValveContact.position;
+        train->pushrodContactLocal = pushrodContact.position;
+        train->valveContactLocal = valveContact.position;
+
+        const Vec3 pivotAxis = train->pivotAxis;
+        const Vec3 pivotToPushrod =
+            TransformPoint(train->rockerDefault, train->rockerPushrodLocal) - train->pivotPoint;
+        const Vec3 pivotToValve =
+            TransformPoint(train->rockerDefault, train->rockerValveLocal) - train->pivotPoint;
+
+        const Vec3 pushrodAxis = train->pushrodSlider.axis;
+        const Vec3 valveAxis = train->valveSlider.axis;
+
+        const Vec3 pushrodMomentArm = Cross(pivotAxis, pivotToPushrod);
+        const Vec3 valveMomentArm = Cross(pivotAxis, pivotToValve);
+
+        const float pushrodEff = Dot(pushrodMomentArm, pushrodAxis);
+        const float valveEff = Dot(valveMomentArm, valveAxis);
+
+        constexpr float kDesiredValveLift = 0.012f;
+        train->pushrodAmplitude = 0.0f;
+        train->pushrodDirection = 1.0f;
+        if (std::fabs(valveEff) > 1e-5f && std::fabs(pushrodEff) > 1e-5f) {
+            const float ratio = pushrodEff / valveEff;
+            float amplitude = kDesiredValveLift * ratio;
+            if (amplitude < 0.0f) {
+                train->pushrodDirection = -1.0f;
+                amplitude = -amplitude;
+            }
+            train->pushrodAmplitude = amplitude;
+        }
+
+        if (train->pushrodAmplitude <= 1e-5f) {
+            train->pushrodAmplitude = 0.008f;
+            train->pushrodDirection = 1.0f;
+        }
+
+        train->valid = true;
+    };
+
+    buildTrain(&intakeTrain_, "rod", "rocker_arm", "valve", 0.0f);
+    buildTrain(&exhaustTrain_, "rod_2", "rocker_arm_2", "valve_2", kPi);
+}
+
+void KinematicsSystem::BuildFollowers() {
+    followers_.clear();
+
+    struct Pair {
+        const char* source;
+        const char* follower;
+    };
+
+    const Pair pairs[] = {
+        {"connecting_rod", "cover"},
+        {"connecting_rod", "pin"},
+        {"valve", "retainer"},
+        {"valve", "valve_spring_retainer"},
+        {"valve_2", "retainer_2"},
+        {"valve_2", "valve_spring_retainer_2"},
+    };
+
+    for (const auto& pair : pairs) {
+        auto sourceIt = anchorLookup_.find(pair.source);
+        auto followerIt = anchorLookup_.find(pair.follower);
+        if (sourceIt == anchorLookup_.end() || followerIt == anchorLookup_.end()) {
+            continue;
+        }
+
+        RelativeFollower follower;
+        follower.sourceIndex = sourceIt->second;
+        follower.followerIndex = followerIt->second;
+
+        const Mat4 sourceInv = InvertRigidTransform(anchors_[follower.sourceIndex].defaultTransform);
+        follower.relative = Multiply(sourceInv, anchors_[follower.followerIndex].defaultTransform);
+        followers_.push_back(follower);
     }
 }
 
@@ -486,6 +720,113 @@ void KinematicsSystem::ApplyRotatingParts(float crankRadians,
         Mat4 rotation = AxisAngleMatrix(part.axisDirection, angle);
         Mat4 combined = Multiply(translateBack, Multiply(rotation, Multiply(translateToOrigin, part.defaultTransform)));
         transforms[part.anchorIndex].transform = combined;
+    }
+}
+
+void KinematicsSystem::ApplySliderDisplacement(const LinearSlider& slider, float displacement,
+                                               std::vector<PartTransform>& transforms) const {
+    if (!slider.valid || slider.anchorIndex >= transforms.size()) {
+        return;
+    }
+
+    const Vec3 translation = slider.axis * displacement;
+    const Mat4 translationMatrix = Translation(translation);
+    transforms[slider.anchorIndex].transform =
+        Multiply(translationMatrix, slider.defaultTransform);
+}
+
+void KinematicsSystem::ApplyValvetrain(float crankRadians, std::vector<PartTransform>& transforms) {
+    auto solveTrain = [&](ValvetrainSet& train) {
+        if (!train.valid) {
+            return;
+        }
+        if (train.pushrodIndex >= transforms.size() || train.rockerIndex >= transforms.size() ||
+            train.valveIndex >= transforms.size()) {
+            return;
+        }
+
+        float camAngle = std::fmod(crankRadians * 0.5f + train.camPhase, kTwoPi);
+        if (camAngle < 0.0f) {
+            camAngle += kTwoPi;
+        }
+
+        constexpr float kOpenDuration = kPi;
+        float normalized = 0.0f;
+        if (camAngle < kOpenDuration) {
+            const float progress = camAngle / kOpenDuration;
+            normalized = 0.5f * (1.0f - std::cos(progress * kPi));
+        }
+
+        const float pushrodDisplacement = train.pushrodAmplitude * normalized * train.pushrodDirection;
+        ApplySliderDisplacement(train.pushrodSlider, pushrodDisplacement, transforms);
+
+        const Mat4& pushrodTransform = transforms[train.pushrodIndex].transform;
+        const Vec3 pushrodContactWorld =
+            TransformPoint(pushrodTransform, train.pushrodContactLocal);
+
+        Vec3 pivotAxis = train.pivotAxis;
+        if (Length(pivotAxis) <= std::numeric_limits<float>::epsilon()) {
+            return;
+        }
+        pivotAxis = Normalize(pivotAxis);
+
+        const Vec3 defaultPushrodWorld =
+            TransformPoint(train.rockerDefault, train.rockerPushrodLocal);
+        const Vec3 defaultVector = defaultPushrodWorld - train.pivotPoint;
+        const Vec3 targetVector = pushrodContactWorld - train.pivotPoint;
+
+        Vec3 projectedDefault = defaultVector - pivotAxis * Dot(pivotAxis, defaultVector);
+        Vec3 projectedTarget = targetVector - pivotAxis * Dot(pivotAxis, targetVector);
+
+        const float defaultLength = Length(projectedDefault);
+        const float targetLength = Length(projectedTarget);
+        if (defaultLength <= 1e-5f || targetLength <= 1e-5f) {
+            return;
+        }
+
+        projectedDefault = projectedDefault / defaultLength;
+        projectedTarget = projectedTarget / targetLength;
+
+        const Vec3 crossVec = Cross(projectedDefault, projectedTarget);
+        const float sinAngle = Dot(pivotAxis, crossVec);
+        const float cosAngle = Clamp(Dot(projectedDefault, projectedTarget), -1.0f, 1.0f);
+        const float angle = std::atan2(sinAngle, cosAngle);
+
+        const Mat4 translateToPivot = Translation(train.pivotPoint * -1.0f);
+        const Mat4 translateBack = Translation(train.pivotPoint);
+        const Mat4 rotation = AxisAngleMatrix(pivotAxis, angle);
+        const Mat4 updatedRocker =
+            Multiply(translateBack, Multiply(rotation, Multiply(translateToPivot, train.rockerDefault)));
+        transforms[train.rockerIndex].transform = updatedRocker;
+
+        const Vec3 rockerPushrodContact =
+            TransformPoint(updatedRocker, train.rockerPushrodLocal);
+        const float correctedPushrodDisplacement =
+            Dot(rockerPushrodContact - train.pushrodSlider.basePoint, train.pushrodSlider.axis);
+        ApplySliderDisplacement(train.pushrodSlider, correctedPushrodDisplacement, transforms);
+
+        const Vec3 rockerValveContact =
+            TransformPoint(updatedRocker, train.rockerValveLocal);
+        float valveDisplacement =
+            Dot(rockerValveContact - train.valveSlider.basePoint, train.valveSlider.axis);
+        if (valveDisplacement < 0.0f) {
+            valveDisplacement = 0.0f;
+        }
+        ApplySliderDisplacement(train.valveSlider, valveDisplacement, transforms);
+    };
+
+    solveTrain(intakeTrain_);
+    solveTrain(exhaustTrain_);
+}
+
+void KinematicsSystem::ApplyFollowers(std::vector<PartTransform>& transforms) const {
+    for (const auto& follower : followers_) {
+        if (follower.sourceIndex >= transforms.size() ||
+            follower.followerIndex >= transforms.size()) {
+            continue;
+        }
+        transforms[follower.followerIndex].transform =
+            Multiply(transforms[follower.sourceIndex].transform, follower.relative);
     }
 }
 
