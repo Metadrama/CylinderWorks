@@ -522,6 +522,10 @@ void KinematicsSystem::ValidateKeyPairs(const std::vector<PartTransform>& transf
                                 "Constraint between '%s' and '%s' violated (distance %.6f, axis %.6f)",
                                 anchors_[pair.partA].name.c_str(), anchors_[pair.partB].name.c_str(),
                                 distance, axisAlignment);
+            __android_log_assert("constraint", kTag,
+                                 "Constraint between '%s' and '%s' violated (distance %.6f, axis %.6f)",
+                                 anchors_[pair.partA].name.c_str(), anchors_[pair.partB].name.c_str(),
+                                 distance, axisAlignment);
         }
     }
 }
