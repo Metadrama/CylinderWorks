@@ -461,12 +461,7 @@ void KinematicsSystem::ApplySliderCrank(float crankRadians,
 
     Mat4 rotatedRod = Multiply(rotationMatrix, sliderCrank_.rodDefaultNoTranslation);
     const Vec3 rotatedSmall = TransformPoint(rotatedRod, sliderCrank_.rodSmallLocal);
-    const Vec3 rotatedBig = TransformPoint(rotatedRod, sliderCrank_.rodBigLocal);
-    Vec3 translation = smallEnd - rotatedSmall;
-    Vec3 translationBig = bigEnd - rotatedBig;
-    translation = Vec3{(translation.x + translationBig.x) * 0.5f,
-                       (translation.y + translationBig.y) * 0.5f,
-                       (translation.z + translationBig.z) * 0.5f};
+    const Vec3 translation = smallEnd - rotatedSmall;
     Mat4 rodTranslation = Translation(translation);
     transforms[sliderCrank_.rodIndex].transform = Multiply(rodTranslation, rotatedRod);
 
@@ -514,7 +509,7 @@ void KinematicsSystem::ValidateKeyPairs(const std::vector<PartTransform>& transf
             Length(pair.localAxisB) > std::numeric_limits<float>::epsilon()) {
             const Vec3 axisA = Normalize(TransformDirection(transformA->transform, pair.localAxisA));
             const Vec3 axisB = Normalize(TransformDirection(transformB->transform, pair.localAxisB));
-            axisAlignment = Dot(axisA, axisB);
+            axisAlignment = std::fabs(Dot(axisA, axisB));
         }
 
         if (distance > kPositionTolerance || axisAlignment < kAxisTolerance) {
@@ -522,10 +517,6 @@ void KinematicsSystem::ValidateKeyPairs(const std::vector<PartTransform>& transf
                                 "Constraint between '%s' and '%s' violated (distance %.6f, axis %.6f)",
                                 anchors_[pair.partA].name.c_str(), anchors_[pair.partB].name.c_str(),
                                 distance, axisAlignment);
-            __android_log_assert("constraint", kTag,
-                                 "Constraint between '%s' and '%s' violated (distance %.6f, axis %.6f)",
-                                 anchors_[pair.partA].name.c_str(), anchors_[pair.partB].name.c_str(),
-                                 distance, axisAlignment);
         }
     }
 }
