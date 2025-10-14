@@ -417,73 +417,13 @@ void EngineRenderer::StepTestKinematicsLocked(float deltaSeconds) {
         return;
     }
 
-    workingPose_ = defaultPose_;
-
     const float deltaAngle = kTwoPi * rpm * (deltaSeconds / 60.0f);
     testAngle_ = std::fmod(testAngle_ + deltaAngle, kTwoPi);
     if (testAngle_ < 0.0f) {
         testAngle_ += kTwoPi;
     }
 
-    const float angleDegrees = testAngle_ * kRadToDeg;
-
-    auto applyRotation = [&](const char* name, const Vec3& rotationDeg) {
-        auto it = partIndices_.find(name);
-        if (it == partIndices_.end()) {
-            return;
-        }
-        const size_t index = it->second;
-        if (index >= workingPose_.size()) {
-            return;
-        }
-        const Mat4& base = defaultPose_[index].transform;
-        const Mat4 rotation = ComposeTransform(Vec3{0.0f, 0.0f, 0.0f}, rotationDeg);
-        workingPose_[index].transform = Multiply(base, rotation);
-    };
-
-    auto applyTranslationY = [&](const char* name, float offsetY) {
-        auto it = partIndices_.find(name);
-        if (it == partIndices_.end()) {
-            return;
-        }
-        const size_t index = it->second;
-        if (index >= workingPose_.size()) {
-            return;
-        }
-        const Mat4& base = defaultPose_[index].transform;
-        const Mat4 translation = ComposeTransform(Vec3{0.0f, offsetY, 0.0f}, Vec3{0.0f, 0.0f, 0.0f});
-        workingPose_[index].transform = Multiply(base, translation);
-    };
-
-    // Basic rotational playback for rotating parts.
-    applyRotation("crankshaft", Vec3{angleDegrees, 0.0f, 0.0f});
-    applyRotation("shaft", Vec3{angleDegrees, 0.0f, 0.0f});
-    applyRotation("propeller", Vec3{angleDegrees, 0.0f, 0.0f});
-    applyRotation("driving_gear", Vec3{0.0f, angleDegrees, 0.0f});
-    applyRotation("gear", Vec3{0.0f, -angleDegrees, 0.0f});
-    applyRotation("camshaft", Vec3{angleDegrees * 0.5f, 0.0f, 0.0f});
-
-    // Simple slider-crank approximation for piston motion.
-    constexpr float kCrankRadius = 0.0275f;  // meters (approx)
-    constexpr float kRodLength = 0.085f;
-    const float sinTheta = std::sin(testAngle_);
-    const float cosTheta = std::cos(testAngle_);
-    const float underSqrt = std::max(kRodLength * kRodLength - (kCrankRadius * kCrankRadius * sinTheta * sinTheta), 0.0f);
-    const float sliderPos = kCrankRadius * cosTheta + std::sqrt(underSqrt);
-    const float reference = kRodLength + kCrankRadius;
-    const float pistonOffset = sliderPos - reference;
-    applyTranslationY("piston", pistonOffset);
-
-    // Rough connecting rod tilt coupled with piston offset.
-    auto rodIt = partIndices_.find("connecting_rod");
-    if (rodIt != partIndices_.end() && rodIt->second < workingPose_.size()) {
-        const float sinTilt = Clamp((kCrankRadius * sinTheta) / kRodLength, -1.0f, 1.0f);
-        const float tiltDegrees = std::asin(sinTilt) * kRadToDeg;
-        const Mat4& base = defaultPose_[rodIt->second].transform;
-        const Mat4 tilt = ComposeTransform(Vec3{0.0f, pistonOffset * 0.5f, 0.0f}, Vec3{0.0f, 0.0f, tiltDegrees});
-        workingPose_[rodIt->second].transform = Multiply(base, tilt);
-    }
-
+    workingPose_ = kinematics_.SolveForAngle(testAngle_);
     assembly_.ApplyTransforms(workingPose_);
 }
 
