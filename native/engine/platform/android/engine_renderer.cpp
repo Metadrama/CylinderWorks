@@ -22,7 +22,6 @@ constexpr float kMinorStep = 0.1f;
 constexpr float kPlaneExtent = 200.0f;
 constexpr float kLightDir[3] = {-0.35f, 1.0f, 0.45f};
 constexpr float kTwoPi = 6.28318530717958647693f;
-constexpr float kRadToDeg = 57.29577951308232f;
 
 void CopyGlString(const GLubyte* source, std::array<char, 128>& destination) {
     if (!source) {
