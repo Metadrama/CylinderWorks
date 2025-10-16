@@ -239,8 +239,16 @@ void KinematicsSystem::BuildSliderCrankData() {
     sliderCrank_.rodSmallLocal = rodToPistonRodGeom.position;
     sliderCrank_.rodBigLocal = rodBigGeom.position;
     sliderCrank_.pistonLocal = rodToPistonPistonGeom.position;
-    sliderCrank_.pistonAxis = Normalize(TransformDirection(sliderCrank_.pistonDefault,
-                                                           rodToPistonPistonGeom.axis));
+
+    sliderCrank_.pistonAxis = Vec3{0.0f, 1.0f, 0.0f};
+    ConstraintGeometry pistonGroundGeom;
+    if (findConcentric("piston", std::string{}, &pistonGroundGeom, nullptr)) {
+        sliderCrank_.pistonAxis = Normalize(
+            TransformDirection(sliderCrank_.pistonDefault, pistonGroundGeom.axis));
+    } else {
+        sliderCrank_.pistonAxis = Normalize(
+            TransformDirection(sliderCrank_.pistonDefault, rodToPistonPistonGeom.axis));
+    }
     if (Length(sliderCrank_.pistonAxis) <= std::numeric_limits<float>::epsilon()) {
         sliderCrank_.pistonAxis = Vec3{0.0f, 1.0f, 0.0f};
     }
