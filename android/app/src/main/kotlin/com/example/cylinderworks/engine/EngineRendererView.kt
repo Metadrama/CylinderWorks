@@ -43,8 +43,8 @@ class EngineRendererView(context: Context) : PlatformView, SurfaceHolder.Callbac
         }
 
         surfaceView.holder.addCallback(this)
-        surfaceView.holder.setFormat(android.graphics.PixelFormat.OPAQUE)
-        surfaceView.setZOrderOnTop(false)
+        surfaceView.holder.setFormat(android.graphics.PixelFormat.TRANSLUCENT)
+        surfaceView.setZOrderOnTop(true)
         surfaceView.keepScreenOn = true
 
         scaleDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {

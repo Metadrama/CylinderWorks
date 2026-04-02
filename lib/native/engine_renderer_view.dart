@@ -21,16 +21,32 @@ class EngineRendererView extends StatelessWidget {
       );
     }
 
-    // The gesture recognizers are handled entirely on the native side.
-    final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers = {};
+    const String viewType = 'engine/renderer';
+    final Map<String, dynamic> creationParams = <String, dynamic>{};
 
-    return AndroidView(
-      viewType: 'engine/renderer',
-      layoutDirection: TextDirection.ltr,
-      creationParams: null,
-      creationParamsCodec: const StandardMessageCodec(),
-      gestureRecognizers: gestureRecognizers,
-      hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+    return PlatformViewLink(
+      viewType: viewType,
+      surfaceFactory: (context, controller) {
+        return AndroidViewSurface(
+          controller: controller as AndroidViewController,
+          gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+          hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+        );
+      },
+      onCreatePlatformView: (params) {
+        return PlatformViewsService.initSurfaceAndroidView(
+          id: params.id,
+          viewType: viewType,
+          layoutDirection: TextDirection.ltr,
+          creationParams: creationParams,
+          creationParamsCodec: const StandardMessageCodec(),
+          onFocus: () {
+            params.onFocusChanged(true);
+          },
+        )
+          ..addOnPlatformViewCreatedListener(params.onPlatformViewCreated)
+          ..create();
+      },
     );
   }
 }
