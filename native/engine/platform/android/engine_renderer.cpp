@@ -57,7 +57,7 @@ out vec4 fragColor;
 float gridLine(float coord, float stepSize) {
     float coordScaled = coord / stepSize;
     float derivative = fwidth(coordScaled);
-    float line = abs(fract(coordScaled - 0.5) - 0.5) / max(derivative, 1e-4);
+    float line = abs(fract(coordScaled - 0.5) - 0.5) / max(derivative, 0.01);
     return 1.0 - clamp(line, 0.0, 1.0);
 }
 
@@ -65,16 +65,15 @@ void main() {
     float minor = max(gridLine(vWorldPos.x, uMinorStep), gridLine(vWorldPos.z, uMinorStep));
     float major = max(gridLine(vWorldPos.x, uMajorStep), gridLine(vWorldPos.z, uMajorStep));
 
-    vec3 baseColor = vec3(0.04, 0.05, 0.07);
-    vec3 minorColor = vec3(0.10, 0.12, 0.18);
-    vec3 majorColor = vec3(0.35, 0.40, 0.55);
+    vec3 baseColor = vec3(0.08, 0.10, 0.14);
+    vec3 minorColor = vec3(0.25, 0.30, 0.45);
+    vec3 majorColor = vec3(0.60, 0.70, 0.95);
 
-    float blend = max(minor * 0.6, major);
-    vec3 color = mix(baseColor, minorColor, minor * 0.7);
+    vec3 color = mix(baseColor, minorColor, minor * 0.8);
     color = mix(color, majorColor, major);
 
-    float fade = clamp(1.0 - length(vLocalPos.xz) * 0.5, 0.0, 1.0);
-    color *= fade + 0.2;
+    float fade = clamp(1.2 - length(vLocalPos.xz), 0.0, 1.0);
+    color *= (fade * 0.8 + 0.2);
 
     fragColor = vec4(color, 1.0);
 }
@@ -186,18 +185,11 @@ void EngineRenderer::InitializeGlResourcesLocked() {
     uViewProj_ = glGetUniformLocation(shader_.Id(), "uViewProj");
     uModel_ = glGetUniformLocation(shader_.Id(), "uModel");
     uCameraPos_ = glGetUniformLocation(shader_.Id(), "uCameraPos");
-
-    GLint extentLocation = glGetUniformLocation(shader_.Id(), "uExtent");
-    GLint majorLocation = glGetUniformLocation(shader_.Id(), "uMajorStep");
-    GLint minorLocation = glGetUniformLocation(shader_.Id(), "uMinorStep");
+    uExtent_ = glGetUniformLocation(shader_.Id(), "uExtent");
+    uMajorStep_ = glGetUniformLocation(shader_.Id(), "uMajorStep");
+    uMinorStep_ = glGetUniformLocation(shader_.Id(), "uMinorStep");
 
     gridPlane_.Initialize();
-
-    glUseProgram(shader_.Id());
-    glUniform1f(extentLocation, kPlaneExtent);
-    glUniform1f(majorLocation, kMajorStep);
-    glUniform1f(minorLocation, kMinorStep);
-    glUseProgram(0);
 
     CopyGlString(glGetString(GL_RENDERER), gpuRenderer_);
     CopyGlString(glGetString(GL_VENDOR), gpuVendor_);
@@ -263,7 +255,7 @@ void EngineRenderer::RenderFrame(int64_t frameTimeNanos) {
 
     glViewport(0, 0, width_, height_);
     glEnable(GL_DEPTH_TEST);
-    glClearColor(0.04f, 0.05f, 0.07f, 1.0f);
+    glClearColor(0.12f, 0.14f, 0.18f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glUseProgram(shader_.Id());
@@ -278,6 +270,10 @@ void EngineRenderer::RenderFrame(int64_t frameTimeNanos) {
 
     const Vec3 eye = camera_.EyePosition();
     glUniform3f(uCameraPos_, eye.x, eye.y, eye.z);
+
+    glUniform1f(uExtent_, kPlaneExtent);
+    glUniform1f(uMajorStep_, kMajorStep);
+    glUniform1f(uMinorStep_, kMinorStep);
 
     gridPlane_.Draw();
 

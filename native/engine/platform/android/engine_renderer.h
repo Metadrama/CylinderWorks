@@ -64,6 +64,9 @@ private:
     GLint uViewProj_{-1};
     GLint uModel_{-1};
     GLint uCameraPos_{-1};
+    GLint uExtent_{-1};
+    GLint uMajorStep_{-1};
+    GLint uMinorStep_{-1};
 
     int width_{0};
     int height_{0};
