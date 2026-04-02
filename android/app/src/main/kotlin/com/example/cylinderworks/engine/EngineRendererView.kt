@@ -103,7 +103,7 @@ class EngineRendererView(private val context: Context) : PlatformView, SurfaceHo
                     val buffer = ByteBuffer.allocateDirect(bytes.size)
                     buffer.put(bytes)
                     buffer.rewind()
-                    val success = loader.invoke(NativeBridge, rendererHandle, buffer, bytes.size)
+                    val success = loader(rendererHandle, buffer, bytes.size)
                     if (!success) {
                         Log.e(TAG, "Failed to load engine asset: $name")
                     } else {
