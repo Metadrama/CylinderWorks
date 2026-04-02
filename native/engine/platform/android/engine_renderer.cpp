@@ -284,7 +284,7 @@ void EngineRenderer::RenderFrame(int64_t frameTimeNanos) {
     egl_.SwapBuffers();
 }
 
-void EngineRenderer::FrameCallback(long frameTimeNanos, void* data) {
+void EngineRenderer::FrameCallback(int64_t frameTimeNanos, void* data) {
     auto* renderer = reinterpret_cast<EngineRenderer*>(data);
     if (!renderer) {
         return;
@@ -339,7 +339,7 @@ void EngineRenderer::FallbackLoop() {
 
         const auto now = steady_clock::now();
         const auto nanos = duration_cast<nanoseconds>(now.time_since_epoch()).count();
-        FrameCallback(static_cast<long>(nanos), this);
+        FrameCallback(static_cast<int64_t>(nanos), this);
 
         interval = nanoseconds(1'000'000'000 / std::max(1, preferredFps_.load()));
         nextTick += interval;

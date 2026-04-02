@@ -44,7 +44,7 @@ private:
     void ClearSurfaceLocked();
 
     void RenderFrame(int64_t frameTimeNanos);
-    static void FrameCallback(long frameTimeNanos, void* data);
+    static void FrameCallback(int64_t frameTimeNanos, void* data);
 
     void ScheduleNextFrame();
     void StartFallbackLoopLocked();
