@@ -255,7 +255,7 @@ void EngineRenderer::RenderFrame(int64_t frameTimeNanos) {
 
     glViewport(0, 0, width_, height_);
     glEnable(GL_DEPTH_TEST);
-    glClearColor(0.5f, 0.0f, 0.5f, 1.0f);
+    glClearColor(0.08f, 0.10f, 0.14f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glUseProgram(shader_.Id());
