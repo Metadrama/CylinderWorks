@@ -18,3 +18,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/3d/piston.glb
+    - assets/3d/crankshaft.glb
+    - assets/3d/connecting_rod.glb

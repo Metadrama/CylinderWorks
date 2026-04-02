@@ -243,10 +243,12 @@ void EngineRenderer::RenderFrame(int64_t frameTimeNanos) {
         return;
     }
 
+    float deltaSeconds = 0.0f;
     const int64_t previousTime = lastFrameTime_.exchange(frameTimeNanos, std::memory_order_relaxed);
     if (previousTime > 0) {
         const float deltaMs = static_cast<float>(frameTimeNanos - previousTime) / 1'000'000.0f;
         frameTimeMs_.store(deltaMs, std::memory_order_relaxed);
+        deltaSeconds = deltaMs / 1000.0f;
         if (deltaMs > 0.0f) {
             fps_.store(1000.0f / deltaMs, std::memory_order_relaxed);
         }
@@ -277,7 +279,43 @@ void EngineRenderer::RenderFrame(int64_t frameTimeNanos) {
 
     gridPlane_.Draw();
 
+    engineCore_.Update(deltaSeconds);
+    engineCore_.Render(viewProj, eye);
+
     egl_.SwapBuffers();
+}
+
+bool EngineRenderer::LoadCrankshaft(const void* data, size_t size) {
+    std::scoped_lock lock(mutex_);
+    if (!egl_.IsValid() || !egl_.MakeCurrent()) {
+        return false;
+    }
+    bool result = engineCore_.LoadCrankshaft(data, size);
+    egl_.DetachCurrent();
+    eglReleaseThread();
+    return result;
+}
+
+bool EngineRenderer::LoadPiston(const void* data, size_t size) {
+    std::scoped_lock lock(mutex_);
+    if (!egl_.IsValid() || !egl_.MakeCurrent()) {
+        return false;
+    }
+    bool result = engineCore_.LoadPiston(data, size);
+    egl_.DetachCurrent();
+    eglReleaseThread();
+    return result;
+}
+
+bool EngineRenderer::LoadConnectingRod(const void* data, size_t size) {
+    std::scoped_lock lock(mutex_);
+    if (!egl_.IsValid() || !egl_.MakeCurrent()) {
+        return false;
+    }
+    bool result = engineCore_.LoadConnectingRod(data, size);
+    egl_.DetachCurrent();
+    eglReleaseThread();
+    return result;
 }
 
 void EngineRenderer::FrameCallback(int64_t frameTimeNanos, void* data) {

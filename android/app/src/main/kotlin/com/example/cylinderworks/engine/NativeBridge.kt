@@ -17,4 +17,8 @@ object NativeBridge {
     external fun nativeZoom(handle: Long, delta: Float)
     external fun nativeSetPreferredFps(handle: Long, fps: Int)
     external fun nativeGetDiagnostics(handle: Long): Map<String, Any?>?
+
+    external fun nativeLoadCrankshaft(handle: Long, buffer: java.nio.ByteBuffer, size: Int): Boolean
+    external fun nativeLoadPiston(handle: Long, buffer: java.nio.ByteBuffer, size: Int): Boolean
+    external fun nativeLoadConnectingRod(handle: Long, buffer: java.nio.ByteBuffer, size: Int): Boolean
 }

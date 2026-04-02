@@ -234,6 +234,30 @@ Java_com_example_cylinderworks_engine_NativeBridge_nativeSetPreferredFps(JNIEnv*
     renderer->SetPreferredFrameRate(fps);
 }
 
+JNIEXPORT jboolean JNICALL
+Java_com_example_cylinderworks_engine_NativeBridge_nativeLoadCrankshaft(JNIEnv* env, jclass /*clazz*/, jlong handle, jobject buffer, jint size) {
+    auto* renderer = FromHandle(handle);
+    if (!renderer) return JNI_FALSE;
+    void* data = env->GetDirectBufferAddress(buffer);
+    return renderer->LoadCrankshaft(data, size) ? JNI_TRUE : JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL
+Java_com_example_cylinderworks_engine_NativeBridge_nativeLoadPiston(JNIEnv* env, jclass /*clazz*/, jlong handle, jobject buffer, jint size) {
+    auto* renderer = FromHandle(handle);
+    if (!renderer) return JNI_FALSE;
+    void* data = env->GetDirectBufferAddress(buffer);
+    return renderer->LoadPiston(data, size) ? JNI_TRUE : JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL
+Java_com_example_cylinderworks_engine_NativeBridge_nativeLoadConnectingRod(JNIEnv* env, jclass /*clazz*/, jlong handle, jobject buffer, jint size) {
+    auto* renderer = FromHandle(handle);
+    if (!renderer) return JNI_FALSE;
+    void* data = env->GetDirectBufferAddress(buffer);
+    return renderer->LoadConnectingRod(data, size) ? JNI_TRUE : JNI_FALSE;
+}
+
 JNIEXPORT void JNICALL
 Java_com_example_cylinderworks_engine_NativeBridge_nativeClearSurface(JNIEnv* env, jclass /*clazz*/, jlong handle) {
     auto* renderer = FromHandle(handle);

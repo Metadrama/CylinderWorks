@@ -2,6 +2,8 @@ add_library(engine_core STATIC
     camera.cpp
     grid_plane.cpp
     shader_program.cpp
+    gltf_model.cpp
+    engine_core.cpp
 )
 
 target_include_directories(engine_core

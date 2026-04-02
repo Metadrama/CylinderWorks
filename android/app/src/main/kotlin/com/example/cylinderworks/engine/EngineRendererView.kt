@@ -9,6 +9,7 @@ import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.View
 import io.flutter.plugin.platform.PlatformView
+import java.nio.ByteBuffer
 import kotlin.math.ln
 
 private enum class InteractionMode {
@@ -17,10 +18,11 @@ private enum class InteractionMode {
     PAN
 }
 
-class EngineRendererView(context: Context) : PlatformView, SurfaceHolder.Callback, EngineDiagnosticsRegistry.Provider {
+class EngineRendererView(private val context: Context) : PlatformView, SurfaceHolder.Callback, EngineDiagnosticsRegistry.Provider {
 
     companion object {
         private const val TAG = "EngineRendererView"
+        private const val ASSET_PREFIX = "flutter_assets/assets/3d/"
     }
 
     private val surfaceView: SurfaceView
@@ -80,8 +82,38 @@ class EngineRendererView(context: Context) : PlatformView, SurfaceHolder.Callbac
             Log.e(TAG, "Failed to attach renderer surface")
             return
         }
+
+        loadAssets()
+
         NativeBridge.nativeSetPreferredFps(rendererHandle, 120)
         NativeBridge.nativeStart(rendererHandle)
+    }
+
+    private fun loadAssets() {
+        val assets = mapOf(
+            "piston.glb" to NativeBridge::nativeLoadPiston,
+            "crankshaft.glb" to NativeBridge::nativeLoadCrankshaft,
+            "connecting_rod.glb" to NativeBridge::nativeLoadConnectingRod
+        )
+
+        assets.forEach { (name, loader) ->
+            try {
+                context.assets.open(ASSET_PREFIX + name).use { stream ->
+                    val bytes = stream.readBytes()
+                    val buffer = ByteBuffer.allocateDirect(bytes.size)
+                    buffer.put(bytes)
+                    buffer.rewind()
+                    val success = loader.invoke(NativeBridge, rendererHandle, buffer, bytes.size)
+                    if (!success) {
+                        Log.e(TAG, "Failed to load engine asset: $name")
+                    } else {
+                        Log.i(TAG, "Loaded engine asset: $name (${bytes.size} bytes)")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Asset load exception for $name", e)
+            }
+        }
     }
 
     override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {

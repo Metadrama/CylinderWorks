@@ -12,6 +12,7 @@
 #include "engine/platform/android/egl_context.h"
 #include "engine/core/grid_plane.h"
 #include "engine/core/diagnostics.h"
+#include "engine/core/engine_core.h"
 #include "engine/core/math_types.h"
 #include "engine/core/shader_program.h"
 
@@ -38,6 +39,10 @@ public:
 
     void FillDiagnostics(DiagnosticsSnapshot* outSnapshot) const;
 
+    bool LoadCrankshaft(const void* data, size_t size);
+    bool LoadPiston(const void* data, size_t size);
+    bool LoadConnectingRod(const void* data, size_t size);
+
 private:
     void InitializeGlResourcesLocked();
     void DestroyGlResourcesLocked();
@@ -60,6 +65,7 @@ private:
     OrbitCamera camera_{};
     ShaderProgram shader_{};
     GridPlane gridPlane_{};
+    EngineCore engineCore_{};
 
     GLint uViewProj_{-1};
     GLint uModel_{-1};

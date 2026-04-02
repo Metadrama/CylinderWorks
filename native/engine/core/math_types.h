@@ -100,6 +100,55 @@ struct Mat4 {
         };
         return m;
     }
+
+    static Mat4 Translate(const Vec3& v) {
+        Mat4 m = Identity();
+        m.data[12] = v.x;
+        m.data[13] = v.y;
+        m.data[14] = v.z;
+        return m;
+    }
+
+    static Mat4 RotateX(float radians) {
+        float c = std::cos(radians);
+        float s = std::sin(radians);
+        Mat4 m = Identity();
+        m.data[5] = c;
+        m.data[6] = s;
+        m.data[9] = -s;
+        m.data[10] = c;
+        return m;
+    }
+
+    static Mat4 RotateY(float radians) {
+        float c = std::cos(radians);
+        float s = std::sin(radians);
+        Mat4 m = Identity();
+        m.data[0] = c;
+        m.data[2] = -s;
+        m.data[8] = s;
+        m.data[10] = c;
+        return m;
+    }
+
+    static Mat4 RotateZ(float radians) {
+        float c = std::cos(radians);
+        float s = std::sin(radians);
+        Mat4 m = Identity();
+        m.data[0] = c;
+        m.data[1] = s;
+        m.data[4] = -s;
+        m.data[5] = c;
+        return m;
+    }
+
+    static Mat4 Scale(const Vec3& v) {
+        Mat4 m = Identity();
+        m.data[0] = v.x;
+        m.data[5] = v.y;
+        m.data[10] = v.z;
+        return m;
+    }
 };
 
 inline Mat4 Multiply(const Mat4& a, const Mat4& b) {
